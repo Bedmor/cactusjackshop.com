@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cactus Jack - Alışveriş</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles_index.css" />
+  </head>
+  <body>
+    <!-- Navigation Overlay -->
+    <div class="nav-overlay" id="navOverlay"></div>
+
+    <!-- Navigation Menu -->
+    <nav class="nav-menu" id="navMenu">
+      <ul>
+        <li>
+          <a href="#home">
+            <span class="menu-icon">🏠</span>
+            <span>Ana Sayfa</span>
+          </a>
+        </li>
+        <li>
+          <a href="#about">
+            <span class="menu-icon">ℹ️</span>
+            <span>Hakkımızda</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" id="contactLink">
+            <span class="menu-icon">📞</span>
+            <span>İletişim</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="shop-header">
+      <!-- Burger Menu Button -->
+      <button class="burger-menu" id="burgerMenu" aria-label="Menu">
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+      </button>
+
+      <h1>Cactus Jack</h1>
+    </div>
+
+    <div class="shop-container">
+      <div id="productsGrid" class="products-grid">
+        <!-- Products will be loaded here by JavaScript -->
+      </div>
+    </div>
+
+    <!-- Comments Carousel Section -->
+    <div class="cmt-section">
+      <h2
+        style="
+          text-align: center;
+          color: var(--dark-brown);
+          margin-bottom: 30px;
+        "
+      >
+        💬 Müşteri Yorumları
+      </h2>
+      <div class="carousel-container">
+        <button class="carousel-btn prev" onclick="carouselPrev()">‹</button>
+        <div class="cmt-list" id="cmt-list">
+          <!-- Comments will be loaded here by JavaScript -->
+        </div>
+        <button class="carousel-btn next" onclick="carouselNext()">›</button>
+      </div>
+      <div class="carousel-indicators" id="indicators"></div>
+    </div>
+
+    <!-- Cart Button -->
+    <button class="cart-button" id="cartButton">
+      🛒
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+    <div id="about" class="about">
+      <h2>Hakkımızda</h2>
+      <p>
+        Cactus Jack, kaliteli benzersiz ürünler sunan bir mağazadır.
+        Müşterilerimize en iyi deneyimi sağlamak için buradayız.
+      </p>
+    </div>
+    <div class="footer">
+      <p>&copy; 2024 Cactus Jack. Tüm hakları saklıdır.</p>
+    </div>
+
+    <!-- Contact Modal -->
+    <div class="contact-modal" id="contactModal">
+      <div class="contact-modal-content">
+        <div class="contact-modal-header">
+          <button class="close-contact-modal" id="closeContactModal">×</button>
+          <h2>📞 İletişim</h2>
+          <p>Size nasıl yardımcı olabiliriz?</p>
+        </div>
+        <div class="contact-modal-body">
+          <div class="contact-info">
+            <!-- WhatsApp -->
+            <a
+              href="https://wa.me/905327958765"
+              class="contact-item"
+              target="_blank"
+            >
+              <div class="contact-icon">💬</div>
+              <div class="contact-details">
+                <div class="contact-label">WhatsApp</div>
+                <div class="contact-value">+90 532 795 8765</div>
+              </div>
+            </a>
+
+            <!-- Phone -->
+            <a href="tel:+9055327958765" class="contact-item">
+              <div class="contact-icon">📱</div>
+              <div class="contact-details">
+                <div class="contact-label">Telefon</div>
+                <div class="contact-value">+90 532 795 8765</div>
+              </div>
+            </a>
+
+            <!-- Address -->
+            <div class="contact-item">
+              <div class="contact-icon">📍</div>
+              <div class="contact-details">
+                <div class="contact-label">Adres</div>
+                <div class="contact-value">Sakarya, Türkiye</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Social Media -->
+          <div class="contact-social">
+            <a href="#" class="social-btn" target="_blank">
+              <span class="social-icon">📘</span>
+              <span class="social-label">Facebook</span>
+            </a>
+            <a href="#" class="social-btn" target="_blank">
+              <span class="social-icon">📷</span>
+              <span class="social-label">Instagram</span>
+            </a>
+            <a href="#" class="social-btn" target="_blank">
+              <span class="social-icon">🐦</span>
+              <span class="social-label">Twitter</span>
+            </a>
+            <a href="#" class="social-btn" target="_blank">
+              <span class="social-icon">▶️</span>
+              <span class="social-label">YouTube</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+      <div class="cart-header">
+        <h2>Sepetim</h2>
+        <button class="close-cart" id="closeCart">×</button>
+      </div>
+      <div class="cart-items" id="cartItems">
+        <div class="empty-cart">Sepetiniz boş</div>
+      </div>
+      <div class="cart-footer" id="cartFooter" style="display: none">
+        <div class="cart-total">
+          <span>Toplam:</span>
+          <span id="cartTotal">0 ₺</span>
+        </div>
+        <button class="checkout-btn" onclick="checkout()">
+          <a
+            title="WhatsApp, Public domain, via Wikimedia Commons"
+            href="https://commons.wikimedia.org/wiki/File:WhatsApp.svg"
+            ><img
+              width="32"
+              alt="WhatsApp"
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/512px-WhatsApp.svg.png?20220228223904"
+          /></a>
+          WhatsApp'tan Sipariş Ver
+        </button>
+      </div>
+    </div>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase Config -->
+    <script src="supabase-config.js"></script>
+    <!-- WhatsApp Config -->
+    <script src="whatsapp-config.js"></script>
+    <!-- Shop JS -->
+    <script src="shop.js"></script>
+
+    <!-- Burger Menu Script -->
+    <script>
+      // Burger menu functionality
+      const burgerMenu = document.getElementById("burgerMenu");
+      const navMenu = document.getElementById("navMenu");
+      const navOverlay = document.getElementById("navOverlay");
+      const navLinks = document.querySelectorAll(".nav-menu a");
+
+      function toggleMenu() {
+        burgerMenu.classList.toggle("active");
+        navMenu.classList.toggle("active");
+        navOverlay.classList.toggle("active");
+      }
+
+      burgerMenu.addEventListener("click", toggleMenu);
+      navOverlay.addEventListener("click", toggleMenu);
+
+      // Close menu when clicking a link
+      navLinks.forEach((link) => {
+        link.addEventListener("click", () => {
+          burgerMenu.classList.remove("active");
+          navMenu.classList.remove("active");
+          navOverlay.classList.remove("active");
+        });
+      });
+
+      // Close menu on escape key
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && navMenu.classList.contains("active")) {
+          toggleMenu();
+        }
+      });
+
+      // Contact Modal functionality
+      const contactModal = document.getElementById("contactModal");
+      const contactLink = document.getElementById("contactLink");
+      const closeContactModal = document.getElementById("closeContactModal");
+
+      function openContactModal(e) {
+        e.preventDefault();
+        contactModal.classList.add("active");
+        document.body.style.overflow = "hidden"; // Prevent scrolling
+      }
+
+      function closeContactModalFunc() {
+        contactModal.classList.remove("active");
+        document.body.style.overflow = ""; // Restore scrolling
+      }
+
+      contactLink?.addEventListener("click", openContactModal);
+      closeContactModal?.addEventListener("click", closeContactModalFunc);
+
+      // Close modal when clicking outside
+      contactModal?.addEventListener("click", (e) => {
+        if (e.target === contactModal) {
+          closeContactModalFunc();
+        }
+      });
+
+      // Close modal on escape key
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && contactModal?.classList.contains("active")) {
+          closeContactModalFunc();
+        }
+      });
+    </script>
+  </body>
+</html>

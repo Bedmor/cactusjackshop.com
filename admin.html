@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CACTUS JACK - Yönetim Paneli</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap"
+      rel="stylesheet"
+    />
+    <link href="styles.css" rel="stylesheet" />
+    <link href="styles_admin.css" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- Login Screen -->
+    <div class="login-container" id="loginScreen">
+      <div class="login-box">
+        <h1>🔒 Yönetim Paneli</h1>
+        <p>Lütfen giriş yapın</p>
+        <form id="loginForm" onsubmit="login(event)">
+          <div class="form-group">
+            <label for="password">Şifre</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="Şifrenizi girin"
+              required
+            />
+          </div>
+          <button type="submit" class="login-btn">Giriş Yap</button>
+          <div class="error-message" id="errorMessage">
+            Hatalı şifre! Lütfen tekrar deneyin.
+          </div>
+        </form>
+        <a href="/" class="back-link">← Mağazaya Dön</a>
+      </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="adminPanel">
+      <div class="admin-header">
+        <h1>CACTUS JACK - Yönetim Paneli</h1>
+        <button class="logout-btn" onclick="logout()">Çıkış Yap</button>
+      </div>
+
+      <div class="admin-content">
+        <div class="panel-section">
+          <h2>İstatistikler</h2>
+          <div class="stats-grid" id="statsGrid"></div>
+        </div>
+
+        <!-- Products Management -->
+        <div class="panel-section">
+          <div class="section-header">
+            <h2>Ürün Yönetimi</h2>
+            <button class="add-product-btn" onclick="openAddProductModal()">
+              + Yeni Ürün Ekle
+            </button>
+          </div>
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th>Resim</th>
+                <th>Ürün Adı</th>
+                <th>Açıklama</th>
+                <th>Fiyat</th>
+                <th>Stok</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody">
+              <!-- Products will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+        <div class="comment-section">
+          <h2>Yorum Yönetimi</h2>
+          <button class="add-comment-btn" onclick="openAddCommentModal()">
+            + Yeni Yorum Ekle
+          </button>
+          <table class="comments-table">
+            <thead>
+              <tr>
+                <th>Kullanıcı</th>
+                <th>Yorum</th>
+                <th>Yıldız</th>
+                <th>Tarih</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="commentsTableBody">
+              <!-- Comments will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment Modal -->
+    <div class="modal" id="commentModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="commentModalTitle">Yeni Yorum Ekle</h2>
+          <button class="close-modal" onclick="closeCommentModal()">×</button>
+        </div>
+        <form class="modal-form" id="commentForm" onsubmit="saveComment(event)">
+          <div class="form-group">
+            <label for="cmt-author">Kullanıcı Adı</label>
+            <input type="text" id="cmt-author" required />
+          </div>
+          <div class="form-group">
+            <label for="cmt-body">Yorum</label>
+            <textarea id="cmt-body" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="cmt-stars">Yıldız (1-5)</label>
+            <input
+              class="cmt-stars"
+              type="number"
+              id="cmt-stars"
+              min="1"
+              max="5"
+              value="5"
+              required
+            />
+          </div>
+          <button type="submit" class="save-btn">Kaydet</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal" id="productModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Yeni Ürün Ekle</h2>
+          <button class="close-modal" onclick="closeModal()">×</button>
+        </div>
+        <form class="modal-form" id="productForm" onsubmit="saveProduct(event)">
+          <div class="form-group">
+            <label for="productName">Ürün Adı</label>
+            <input type="text" id="productName" required />
+          </div>
+          <div class="form-group">
+            <label for="productDescription">Açıklama</label>
+            <textarea id="productDescription" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="productPrice">Fiyat (₺)</label>
+            <input type="number" id="productPrice" step="0.01" required />
+          </div>
+          <div class="form-group">
+            <label for="productStock">Stok Adedi</label>
+            <input type="number" id="productStock" required />
+          </div>
+          <div class="form-group">
+            <label for="productImage">Medya (Resim veya Video)</label>
+            <div style="display: flex; gap: 10px; align-items: start">
+              <div style="flex: 1">
+                <input
+                  type="file"
+                  id="productImageFile"
+                  accept="image/*,video/*"
+                  style="margin-bottom: 10px"
+                />
+                <small style="display: block; color: #666; margin-bottom: 10px">
+                  📷 Resimler: JPG, PNG, GIF, WebP (maks 5MB - otomatik
+                  sıkıştırılır)<br />
+                  📹 Videolar: MP4, WebM, MOV (maks 50MB - sıkıştırılmaz)<br />
+                  Veya medya URL'si girin:
+                </small>
+                <input type="text" id="productImage" placeholder="" />
+              </div>
+              <div
+                id="imagePreview"
+                style="
+                  width: 150px;
+                  height: 150px;
+                  border: 2px dashed #ddd;
+                  border-radius: 8px;
+                  overflow: hidden;
+                  display: none;
+                "
+              >
+                <img
+                  id="previewImg"
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: none;
+                  "
+                />
+                <video
+                  id="previewVideo"
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: none;
+                  "
+                  controls
+                  muted
+                  loop
+                ></video>
+              </div>
+            </div>
+            <small style="display: block; color: #666; margin-top: 5px">
+              ℹ️ Dosya seçerseniz otomatik olarak Supabase'e yüklenecek
+            </small>
+          </div>
+          <div id="uploadProgress" style="display: none; margin: 10px 0">
+            <div
+              style="
+                background: #e0e0e0;
+                border-radius: 8px;
+                height: 20px;
+                overflow: hidden;
+              "
+            >
+              <div
+                id="progressBar"
+                style="
+                  background: #4caf50;
+                  height: 100%;
+                  width: 0%;
+                  transition: width 0.3s;
+                "
+              ></div>
+            </div>
+            <small
+              id="progressText"
+              style="
+                display: block;
+                text-align: center;
+                margin-top: 5px;
+                color: #666;
+              "
+            >
+              Yükleniyor...
+            </small>
+          </div>
+          <button type="submit" class="save-btn">Kaydet</button>
+        </form>
+      </div>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase Config -->
+    <script src="supabase-config.js"></script>
+    <!-- Storage Helper -->
+    <script src="storage-helper.js"></script>
+    <!-- Admin JS -->
+    <script src="admin.js"></script>
+  </body>
+</html>
