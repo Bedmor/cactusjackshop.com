@@ -51,6 +51,33 @@
           <div class="stats-grid" id="statsGrid"></div>
         </div>
 
+        <!-- Hero Section Settings -->
+        <div class="panel-section">
+          <div class="section-header">
+            <h2>Üst Bölüm Ayarları</h2>
+          </div>
+          <div id="currentHeroBackground" style="margin-bottom: 20px; padding: 15px; background: var(--cream); border-radius: 8px;">
+            <strong>Mevcut Arkaplan:</strong>
+            <span id="heroBackgroundStatus">Gradyan (Varsayılan)</span>
+          </div>
+          <form class="modal-form" id="heroSettingsForm" onsubmit="saveHeroSettings(event)">
+            <div class="form-group">
+              <label for="heroBackground">Arkaplan Resmi veya Videosu</label>
+              <input type="file" id="heroBackground" accept="image/*,video/*" onchange="previewHeroBackground(event)" />
+              <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                Resim veya video yükleyebilirsiniz. Mevcut arkaplan silinecek ve yeni medya kullanılacak.
+              </small>
+            </div>
+            <div id="heroBackgroundPreview" style="margin-top: 15px; text-align: center;">
+              <!-- Preview will be shown here -->
+            </div>
+            <button type="submit" class="save-btn">Arkaplanı Kaydet</button>
+            <button type="button" class="save-btn" onclick="removeHeroBackground()" style="background: #d32f2f; margin-top: 10px;">
+              Arkaplanı Kaldır (Gradyan Kullan)
+            </button>
+          </form>
+        </div>
+
         <!-- Products Management -->
         <div class="panel-section">
           <div class="section-header">

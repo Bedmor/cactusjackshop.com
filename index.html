@@ -257,6 +257,50 @@
     <!-- Shop JS -->
     <script src="shop.js"></script>
 
+    <!-- Hero Background Loader -->
+    <script>
+      // Load custom hero background if set
+      document.addEventListener("DOMContentLoaded", () => {
+        const heroBackgroundUrl = localStorage.getItem("heroBackgroundUrl");
+        const heroBackgroundType = localStorage.getItem("heroBackgroundType");
+        const heroSection = document.querySelector(".hero-section");
+
+        if (heroBackgroundUrl && heroSection) {
+          if (heroBackgroundType === "video") {
+            // Create video background
+            const video = document.createElement("video");
+            video.src = heroBackgroundUrl;
+            video.autoplay = true;
+            video.muted = true;
+            video.loop = true;
+            video.playsInline = true;
+            video.style.cssText = `
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              z-index: 0;
+            `;
+            heroSection.insertBefore(video, heroSection.firstChild);
+          } else {
+            // Set image background
+            heroSection.style.backgroundImage = `url('${heroBackgroundUrl}')`;
+            heroSection.style.backgroundSize = "cover";
+            heroSection.style.backgroundPosition = "center";
+            heroSection.style.backgroundRepeat = "no-repeat";
+          }
+
+          // Darken overlay for better text visibility
+          const overlay = heroSection.querySelector(".hero-overlay");
+          if (overlay) {
+            overlay.style.background = "rgba(0, 0, 0, 0.4)";
+          }
+        }
+      });
+    </script>
+
     <!-- Burger Menu Script -->
     <script>
       // Burger menu functionality

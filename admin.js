@@ -62,6 +62,7 @@ async function showAdminPanel() {
   await loadProducts();
   await loadComments();
   await loadStats();
+  updateHeroBackgroundStatus();
 }
 
 // Logout function
@@ -495,3 +496,149 @@ document.getElementById('productModal')?.addEventListener('click', (e) => {
     closeModal();
   }
 });
+
+// Hero Background Settings
+async function previewHeroBackground(event) {
+  const file = event.target.files[0];
+  const previewDiv = document.getElementById('heroBackgroundPreview');
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const isVideo = file.type.startsWith('video/');
+      if (isVideo) {
+        previewDiv.innerHTML = `
+          <video src="${e.target.result}" controls style="max-width: 100%; max-height: 300px; border-radius: 8px;">
+            Tarayıcınız video etiketini desteklemiyor.
+          </video>
+        `;
+      } else {
+        previewDiv.innerHTML = `
+          <img src="${e.target.result}" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 8px;" />
+        `;
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function saveHeroSettings(event) {
+  event.preventDefault();
+
+  const fileInput = document.getElementById('heroBackground');
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert('Lütfen bir resim veya video seçin!');
+    return;
+  }
+
+  try {
+    // Show progress
+    const submitBtn = event.target.querySelector('.save-btn');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Yükleniyor...';
+    submitBtn.disabled = true;
+
+    // Upload to storage
+    const { url, isVideo } = await uploadHeroBackground(file);
+
+    // Save to localStorage
+    localStorage.setItem('heroBackgroundUrl', url);
+    localStorage.setItem('heroBackgroundType', isVideo ? 'video' : 'image');
+
+    submitBtn.textContent = '✓ Kaydedildi!';
+    submitBtn.style.background = '#4CAF50';
+
+    // Update status display
+    updateHeroBackgroundStatus();
+
+    setTimeout(() => {
+      submitBtn.textContent = originalText;
+      submitBtn.style.background = '';
+      submitBtn.disabled = false;
+
+      // Clear preview
+      document.getElementById('heroBackgroundPreview').innerHTML = '';
+      fileInput.value = '';
+
+      alert('Hero arkaplanı başarıyla güncellendi! Ana sayfayı yenileyerek görüntüleyebilirsiniz.');
+    }, 2000);
+
+  } catch (error) {
+    console.error('Error saving hero background:', error);
+    alert('Arkaplan kaydedilemedi: ' + error.message);
+
+    const submitBtn = event.target.querySelector('.save-btn');
+    submitBtn.textContent = 'Arkaplanı Kaydet';
+    submitBtn.disabled = false;
+  }
+}
+
+async function uploadHeroBackground(file) {
+  const isVideo = file.type.startsWith('video/');
+  const fileExt = file.name.split('.').pop();
+  const fileName = `hero-background-${Date.now()}.${fileExt}`;
+  const filePath = `${fileName}`;
+
+  // Check if bucket exists, if not use product-images bucket
+  const bucketName = 'product-images'; // Using existing bucket
+
+  if (!isVideo) {
+    // Compress image before upload
+    const compressedFile = await compressImage(file);
+
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .upload(filePath, compressedFile, {
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(filePath);
+
+    return { url: publicUrl, isVideo: false };
+  } else {
+    // Upload video as is (or with compression if needed)
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(filePath);
+
+    return { url: publicUrl, isVideo: true };
+  }
+}
+
+async function removeHeroBackground() {
+  if (confirm('Hero arkaplanını kaldırmak istediğinize emin misiniz? Gradyan arkaplan kullanılacak.')) {
+    localStorage.removeItem('heroBackgroundUrl');
+    localStorage.removeItem('heroBackgroundType');
+    updateHeroBackgroundStatus();
+    alert('Hero arkaplanı kaldırıldı! Ana sayfayı yenileyerek görüntüleyebilirsiniz.');
+  }
+}
+
+function updateHeroBackgroundStatus() {
+  const heroBackgroundUrl = localStorage.getItem('heroBackgroundUrl');
+  const heroBackgroundType = localStorage.getItem('heroBackgroundType');
+  const statusElement = document.getElementById('heroBackgroundStatus');
+
+  if (heroBackgroundUrl) {
+    const mediaType = heroBackgroundType === 'video' ? '📹 Video' : '🖼️ Resim';
+    statusElement.innerHTML = `${mediaType} <a href="${heroBackgroundUrl}" target="_blank" style="color: var(--primary);">Görüntüle</a>`;
+  } else {
+    statusElement.textContent = 'Gradyan (Varsayılan)';
+  }
+}
