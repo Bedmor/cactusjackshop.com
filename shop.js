@@ -503,3 +503,155 @@ function handleSwipe() {
         }
     }
 }
+
+// Products Carousel for Mobile
+let currentProductSlide = 0;
+let productsCarouselInterval;
+const productsSlideDelay = 4000;
+
+function initProductsCarousel() {
+    const isMobile = window.innerWidth <= 768;
+    if (!isMobile) {
+        // Reset on desktop
+        const productsGrid = document.getElementById('productsGrid');
+        if (productsGrid) {
+            productsGrid.style.transform = '';
+        }
+        return;
+    }
+
+    const productsGrid = document.getElementById('productsGrid');
+    const productCards = productsGrid?.querySelectorAll('.product-card');
+
+    if (!productCards || productCards.length === 0) return;
+
+    // Show carousel buttons only on mobile
+    document.querySelectorAll('.products-carousel-btn').forEach(btn => {
+        btn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+    });
+
+    createProductsIndicators();
+    updateProductsCarousel();
+}
+
+function updateProductsCarousel() {
+    const isMobile = window.innerWidth <= 768;
+    if (!isMobile) return;
+
+    const productsGrid = document.getElementById('productsGrid');
+    const productCards = productsGrid?.querySelectorAll('.product-card');
+
+    if (!productCards || productCards.length === 0) return;
+
+    // Keep current slide in bounds
+    const maxSlide = productCards.length - 1;
+    if (currentProductSlide > maxSlide) {
+        currentProductSlide = maxSlide;
+    }
+
+    // Calculate transform
+    const cardWidth = productCards[0].offsetWidth;
+    const gap = 20;
+    const offset = currentProductSlide * (cardWidth + gap);
+
+    productsGrid.style.transform = `translateX(-${offset}px)`;
+
+    updateProductsIndicators();
+}
+
+function productsCarouselNext() {
+    const productsGrid = document.getElementById('productsGrid');
+    const productCards = productsGrid?.querySelectorAll('.product-card');
+    if (!productCards) return;
+
+    const maxSlide = productCards.length - 1;
+    currentProductSlide = (currentProductSlide + 1) > maxSlide ? 0 : currentProductSlide + 1;
+    updateProductsCarousel();
+}
+
+function productsCarouselPrev() {
+    const productsGrid = document.getElementById('productsGrid');
+    const productCards = productsGrid?.querySelectorAll('.product-card');
+    if (!productCards) return;
+
+    const maxSlide = productCards.length - 1;
+    currentProductSlide = (currentProductSlide - 1) < 0 ? maxSlide : currentProductSlide - 1;
+    updateProductsCarousel();
+}
+
+function createProductsIndicators() {
+    const productsGrid = document.getElementById('productsGrid');
+    const productCards = productsGrid?.querySelectorAll('.product-card');
+    const indicatorsContainer = document.getElementById('productsIndicators');
+
+    if (!productCards || !indicatorsContainer) return;
+
+    indicatorsContainer.innerHTML = Array.from({ length: productCards.length }, (_, i) =>
+        `<button class="product-indicator ${i === 0 ? 'active' : ''}" onclick="goToProductSlide(${i})"></button>`
+    ).join('');
+}
+
+function updateProductsIndicators() {
+    const indicators = document.querySelectorAll('.product-indicator');
+    indicators.forEach((indicator, index) => {
+        indicator.classList.toggle('active', index === currentProductSlide);
+    });
+}
+
+function goToProductSlide(index) {
+    currentProductSlide = index;
+    updateProductsCarousel();
+}
+
+// Event listeners for products carousel
+document.addEventListener('DOMContentLoaded', () => {
+    const productsPrev = document.getElementById('productsPrev');
+    const productsNext = document.getElementById('productsNext');
+
+    if (productsPrev) {
+        productsPrev.addEventListener('click', productsCarouselPrev);
+    }
+    if (productsNext) {
+        productsNext.addEventListener('click', productsCarouselNext);
+    }
+
+    // Touch support for products carousel
+    const productsWrapper = document.querySelector('.products-carousel-wrapper');
+    if (productsWrapper) {
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        productsWrapper.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        productsWrapper.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            const swipeThreshold = 50;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    productsCarouselNext();
+                } else {
+                    productsCarouselPrev();
+                }
+            }
+        }, { passive: true });
+    }
+});
+
+// Update carousel on window resize
+window.addEventListener('resize', () => {
+    initProductsCarousel();
+});
+
+// Call initProductsCarousel after products are loaded
+const originalLoadProducts = loadProducts;
+loadProducts = async function () {
+    await originalLoadProducts();
+    // Wait a bit for DOM to update
+    setTimeout(() => {
+        initProductsCarousel();
+    }, 100);
+};

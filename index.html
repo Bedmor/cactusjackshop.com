@@ -46,7 +46,7 @@
     </nav>
 
     <div class="shop-header">
-      <!-- Burger Menu Button -->
+      <!-- Burger Menu Button (Mobile Only) -->
       <button class="burger-menu" id="burgerMenu" aria-label="Menu">
         <span class="burger-line"></span>
         <span class="burger-line"></span>
@@ -54,12 +54,68 @@
       </button>
 
       <h1>Cactus Jack</h1>
+
+      <!-- Desktop Navigation Menu -->
+      <nav class="desktop-nav">
+        <ul>
+          <li>
+            <a href="#home">
+              <span class="menu-icon"></span>
+              <span>Ana Sayfa</span>
+            </a>
+          </li>
+          <li>
+            <a href="#productsGrid">
+              <span class="menu-icon"></span>
+              <span>Ürünler</span>
+            </a>
+          </li>
+          <li>
+            <a href="#about">
+              <span class="menu-icon"></span>
+              <span>Hakkımızda</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="desktop-contact-link">
+              <span class="menu-icon"></span>
+              <span>İletişim</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </div>
 
-    <div class="shop-container">
-      <div id="productsGrid" class="products-grid">
-        <!-- Products will be loaded here by JavaScript -->
+    <!-- Hero Section -->
+    <section class="hero-section" id="home">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h2 class="hero-title">Hoş Geldiniz</h2>
+        <h1 class="hero-main">Cactus Jack Shop</h1>
+        <p class="hero-description">Ahşaptaki Gizem</p>
+        <div class="hero-buttons">
+          <a href="#productsGrid" class="hero-btn primary">
+            Alışverişe Başla
+          </a>
+          <a href="#about" class="hero-btn secondary"> Hakkımızda </a>
+        </div>
       </div>
+      <div class="hero-scroll-indicator">
+        <span>⬇</span>
+        <p>Ürünleri Görüntüle</p>
+      </div>
+    </section>
+
+    <div class="shop-container">
+      <h2 class="products-title">🛍️ Ürünlerimiz</h2>
+      <div class="products-carousel-wrapper">
+        <button class="products-carousel-btn prev" id="productsPrev">‹</button>
+        <div id="productsGrid" class="products-grid">
+          <!-- Products will be loaded here by JavaScript -->
+        </div>
+        <button class="products-carousel-btn next" id="productsNext">›</button>
+      </div>
+      <div class="products-indicators" id="productsIndicators"></div>
     </div>
 
     <!-- Comments Carousel Section -->
@@ -96,7 +152,7 @@
       </p>
     </div>
     <div class="footer">
-      <p>&copy; 2024 Cactus Jack. Tüm hakları saklıdır.</p>
+      <p>&copy; 2025 Cactus Jack. Tüm hakları saklıdır.</p>
     </div>
 
     <!-- Contact Modal -->
@@ -237,6 +293,9 @@
       // Contact Modal functionality
       const contactModal = document.getElementById("contactModal");
       const contactLink = document.getElementById("contactLink");
+      const desktopContactLink = document.querySelector(
+        ".desktop-contact-link"
+      );
       const closeContactModal = document.getElementById("closeContactModal");
 
       function openContactModal(e) {
@@ -251,6 +310,7 @@
       }
 
       contactLink?.addEventListener("click", openContactModal);
+      desktopContactLink?.addEventListener("click", openContactModal);
       closeContactModal?.addEventListener("click", closeContactModalFunc);
 
       // Close modal when clicking outside
@@ -265,6 +325,36 @@
         if (e.key === "Escape" && contactModal?.classList.contains("active")) {
           closeContactModalFunc();
         }
+      });
+
+      // Hero scroll indicator smooth scroll
+      const heroScrollIndicator = document.querySelector(
+        ".hero-scroll-indicator"
+      );
+      if (heroScrollIndicator) {
+        heroScrollIndicator.addEventListener("click", () => {
+          document.getElementById("productsGrid")?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        });
+      }
+
+      // Add smooth scroll to all anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          const href = this.getAttribute("href");
+          if (href !== "#" && href !== "") {
+            e.preventDefault();
+            const target = document.querySelector(href);
+            if (target) {
+              target.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }
+          }
+        });
       });
     </script>
   </body>

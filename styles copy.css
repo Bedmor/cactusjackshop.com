@@ -1,12 +1,12 @@
 /* CSS Variables */
 :root {
   background-color: var(--bg-light);
-  --primary: #FFCAD4;
-  --secondary: #F4ACB7;
-  --dark-brown: #9D8189;
+  --primary: #124559;
+  --secondary: #598392;
+  --dark-brown: #124559;
   --cream: #f6f6f6;
   --green: #7de581;
-  --text-dark: #000000;
+  --text-dark: #141414;
   --text-muted: #666666;
   --bg-light: #ffffff;
 }
