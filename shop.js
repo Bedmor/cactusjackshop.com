@@ -2,12 +2,149 @@
 let products = [];
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
+// Load custom font if set
+async function loadCustomFont() {
+    try {
+        const { data, error } = await supabase
+            .from('links')
+            .select('url, family')
+            .eq('id', 'customFont')
+            .single();
+
+        if (error) {
+            console.error('Error fetching font settings:', error);
+            return;
+        }
+
+        if (!data) {
+            console.log('No custom font settings found');
+            return;
+        }
+
+        const { url: fontLink, family: fontFamily } = data;
+        console.log('Custom font settings:', fontLink, fontFamily);
+
+        if (fontLink && fontFamily) {
+            // Check if font link already exists
+            const existingLink = document.querySelector(`link[href="${fontLink}"]`);
+            if (!existingLink) {
+                // Create and add the link element for Google Fonts
+                const linkElement = document.createElement('link');
+                linkElement.rel = 'stylesheet';
+                linkElement.href = fontLink;
+                document.head.appendChild(linkElement);
+            }
+
+            // Apply the font family to body
+            document.body.style.fontFamily = fontFamily;
+        }
+    } catch (err) {
+        console.error('Error loading custom font:', err);
+    }
+}
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
+    await loadCustomFont();
     await loadProducts();
     await loadComments();
     updateCartUI();
 
+    const productsPrev = document.getElementById('productsPrev');
+    const productsNext = document.getElementById('productsNext');
+
+    if (productsPrev) {
+        productsPrev.addEventListener('click', productsCarouselPrev);
+    }
+    if (productsNext) {
+        productsNext.addEventListener('click', productsCarouselNext);
+    }
+
+    // Touch support for products carousel
+    const productsWrapper = document.querySelector('.products-carousel-wrapper');
+    if (productsWrapper) {
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        productsWrapper.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        productsWrapper.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            const swipeThreshold = 50;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    productsCarouselNext();
+                } else {
+                    productsCarouselPrev();
+                }
+            }
+        }, { passive: true });
+    };
+
+
+
+    const carouselContainer = document.querySelector('.carousel-container');
+
+    if (carouselContainer) {
+        // Touch events
+        carouselContainer.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        carouselContainer.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+
+        // Mouse events for desktop drag
+        let isDragging = false;
+        let startX = 0;
+
+        carouselContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            carouselContainer.style.cursor = 'grabbing';
+        });
+
+        carouselContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+        });
+
+        carouselContainer.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            carouselContainer.style.cursor = 'grab';
+
+            const endX = e.clientX;
+            const diff = startX - endX;
+
+            if (Math.abs(diff) > 50) { // Minimum swipe distance
+                if (diff > 0) {
+                    carouselNext();
+                } else {
+                    carouselPrev();
+                }
+            }
+        });
+
+        carouselContainer.addEventListener('mouseleave', () => {
+            isDragging = false;
+            carouselContainer.style.cursor = 'grab';
+        });
+    };
+    if (carouselContainer) {
+        carouselContainer.addEventListener('mouseenter', () => {
+            clearInterval(carouselInterval);
+        });
+        carouselContainer.addEventListener('mouseleave', () => {
+            startAutoPlay();
+        });
+    }
     // Cart button event
     document.getElementById('cartButton').addEventListener('click', () => {
         document.getElementById('cartSidebar').classList.add('active');
@@ -186,18 +323,7 @@ window.addEventListener('resize', () => {
     createIndicators();
 });
 
-// Pause auto-play when hovering over carousel
-document.addEventListener('DOMContentLoaded', () => {
-    const carouselContainer = document.querySelector('.carousel-container');
-    if (carouselContainer) {
-        carouselContainer.addEventListener('mouseenter', () => {
-            clearInterval(carouselInterval);
-        });
-        carouselContainer.addEventListener('mouseleave', () => {
-            startAutoPlay();
-        });
-    }
-});
+
 // Load products from Supabase
 async function loadProducts() {
     const productsGrid = document.getElementById('productsGrid');
@@ -553,59 +679,6 @@ function checkout() {
 let touchStartX = 0;
 let touchEndX = 0;
 
-document.addEventListener('DOMContentLoaded', () => {
-    const carouselContainer = document.querySelector('.carousel-container');
-
-    if (carouselContainer) {
-        // Touch events
-        carouselContainer.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        carouselContainer.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, { passive: true });
-
-        // Mouse events for desktop drag
-        let isDragging = false;
-        let startX = 0;
-
-        carouselContainer.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.clientX;
-            carouselContainer.style.cursor = 'grabbing';
-        });
-
-        carouselContainer.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-        });
-
-        carouselContainer.addEventListener('mouseup', (e) => {
-            if (!isDragging) return;
-            isDragging = false;
-            carouselContainer.style.cursor = 'grab';
-
-            const endX = e.clientX;
-            const diff = startX - endX;
-
-            if (Math.abs(diff) > 50) { // Minimum swipe distance
-                if (diff > 0) {
-                    carouselNext();
-                } else {
-                    carouselPrev();
-                }
-            }
-        });
-
-        carouselContainer.addEventListener('mouseleave', () => {
-            isDragging = false;
-            carouselContainer.style.cursor = 'grab';
-        });
-    }
-});
-
 function handleSwipe() {
     const swipeThreshold = 50; // Minimum distance for swipe
     const diff = touchStartX - touchEndX;
@@ -719,44 +792,6 @@ function goToProductSlide(index) {
     currentProductSlide = index;
     updateProductsCarousel();
 }
-
-// Event listeners for products carousel
-document.addEventListener('DOMContentLoaded', () => {
-    const productsPrev = document.getElementById('productsPrev');
-    const productsNext = document.getElementById('productsNext');
-
-    if (productsPrev) {
-        productsPrev.addEventListener('click', productsCarouselPrev);
-    }
-    if (productsNext) {
-        productsNext.addEventListener('click', productsCarouselNext);
-    }
-
-    // Touch support for products carousel
-    const productsWrapper = document.querySelector('.products-carousel-wrapper');
-    if (productsWrapper) {
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        productsWrapper.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        productsWrapper.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            const diff = touchStartX - touchEndX;
-            const swipeThreshold = 50;
-
-            if (Math.abs(diff) > swipeThreshold) {
-                if (diff > 0) {
-                    productsCarouselNext();
-                } else {
-                    productsCarouselPrev();
-                }
-            }
-        }, { passive: true });
-    }
-});
 
 // Update carousel on window resize
 window.addEventListener('resize', () => {

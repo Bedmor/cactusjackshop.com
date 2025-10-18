@@ -65,6 +65,7 @@ async function showAdminPanel() {
   await loadComments();
   await loadStats();
   updateHeroBackgroundStatus();
+  updateFontStatus();
 }
 
 // Logout function
@@ -736,3 +737,86 @@ function updateHeroBackgroundStatus() {
     statusElement.textContent = 'Gradyan (Varsayılan)';
   }
 }
+
+async function updateFontStatus() {
+  try {
+    const { data, error } = await supabase
+      .from('links')
+      .select('url, family')
+      .eq('id', 'customFont')
+      .single();
+
+    const statusElement = document.getElementById('fontStatus');
+
+    if (data && data.url && data.family) {
+      statusElement.innerHTML = `📝 ${data.family} <small style="color: #666; display: block; margin-top: 5px;">${data.url}</small>`;
+    } else {
+      statusElement.textContent = 'Varsayılan (Oswald, Oxygen)';
+    }
+  } catch (error) {
+    console.error('Error fetching font status:', error);
+    const statusElement = document.getElementById('fontStatus');
+    statusElement.textContent = 'Varsayılan (Oswald, Oxygen)';
+  }
+}
+
+// Font Settings Functions
+async function saveFontSettings(event) {
+  event.preventDefault();
+
+  const fontLink = document.getElementById('googleFontLink').value.trim();
+  const fontFamily = document.getElementById('fontFamily').value.trim();
+
+  if (!fontLink || !fontFamily) {
+    alert('Lütfen hem Google Fonts linkini hem de font ailesi adını girin.');
+    return;
+  }
+
+  // Validate Google Fonts URL
+  if (!fontLink.includes('fonts.googleapis.com')) {
+    alert('Lütfen geçerli bir Google Fonts linki girin.');
+    return;
+  }
+
+  try {
+    // Save to Supabase
+    const { data, error } = await supabase.from('links').upsert({
+      id: 'customFont',
+      url: fontLink,
+      family: fontFamily
+    });
+
+    if (error) throw error;
+
+    await updateFontStatus();
+    alert('Font ayarları kaydedildi! Ana sayfayı yenileyerek değişiklikleri görüntüleyebilirsiniz.');
+
+    // Clear form
+    document.getElementById('fontSettingsForm').reset();
+  } catch (error) {
+    console.error('Font kaydetme hatası:', error);
+    alert('Font kaydedilirken bir hata oluştu: ' + error.message);
+  }
+}
+
+async function removeCustomFont() {
+  if (confirm('Özel fontu kaldırıp varsayılan fonta dönmek istediğinizden emin misiniz?')) {
+    try {
+      const { error } = await supabase
+        .from('links')
+        .delete()
+        .eq('id', 'customFont');
+
+      if (error) throw error;
+
+      await updateFontStatus();
+      alert('Özel font kaldırıldı! Ana sayfayı yenileyerek varsayılan fontu görüntüleyebilirsiniz.');
+    } catch (error) {
+      console.error('Error removing custom font:', error);
+      alert('Font kaldırılırken bir hata oluştu: ' + error.message);
+    }
+  }
+}
+
+
+

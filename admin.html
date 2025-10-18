@@ -78,6 +78,47 @@
           </form>
         </div>
 
+        <!-- Font Settings -->
+        <div class="panel-section">
+          <div class="section-header">
+            <h2>Font Ayarları</h2>
+          </div>
+          <div id="currentFontStatus" style="margin-bottom: 20px; padding: 15px; background: var(--cream); border-radius: 8px;">
+            <strong>Mevcut Font:</strong>
+            <span id="fontStatus">Varsayılan</span>
+          </div>
+          <form class="modal-form" id="fontSettingsForm" onsubmit="saveFontSettings(event)">
+            <div class="form-group">
+              <label for="googleFontLink">Google Fonts Link</label>
+              <input 
+                type="url" 
+                id="googleFontLink" 
+                placeholder="https://fonts.googleapis.com/css2?family=..." 
+                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+              />
+              <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                Google Fonts'tan aldığınız link'i buraya yapıştırın. Örnek: https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap
+              </small>
+            </div>
+            <div class="form-group">
+              <label for="fontFamily">Font Ailesi Adı</label>
+              <input 
+                type="text" 
+                id="fontFamily" 
+                placeholder="Roboto, sans-serif" 
+                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+              />
+              <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                Font ailesinin CSS adını girin. Örnek: 'Roboto', 'Open Sans', 'Montserrat'
+              </small>
+            </div>
+            <button type="submit" class="save-btn">Fontu Kaydet</button>
+            <button type="button" class="save-btn" onclick="removeCustomFont()" style="background: #d32f2f; margin-top: 10px;">
+              Varsayılan Fonta Dön
+            </button>
+          </form>
+        </div>
+
         <!-- Products Management -->
         <div class="panel-section">
           <div class="section-header">
