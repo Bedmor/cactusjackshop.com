@@ -120,7 +120,7 @@ body {
 .admin-header {
   background: linear-gradient(
     90deg,
-    var(--dark-brown) 60%,
+    var(--secondary) 60%,
     var(--primary) 100%
   );
   color: white;
@@ -143,7 +143,7 @@ body {
 
 .logout-btn {
   padding: 10px 24px;
-  background: linear-gradient(90deg, var(--primary), var(--green));
+  background: linear-gradient(90deg, var(--primary), rgb(249, 198, 206));
   color: white;
   border: none;
   border-radius: 10px;
@@ -155,7 +155,7 @@ body {
 }
 
 .logout-btn:hover {
-  background: linear-gradient(90deg, var(--green), var(--primary));
+  background-color: #d32f2f;
   transform: scale(1.05);
 }
 
@@ -396,7 +396,7 @@ body {
 .save-btn {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(90deg, var(--green), var(--primary));
+  background-color: var(--green);
   color: white;
   border: none;
   border-radius: 10px;
@@ -409,7 +409,7 @@ body {
 }
 
 .save-btn:hover {
-  background: linear-gradient(90deg, var(--primary), var(--green));
+  background-color: var(--primary);
   transform: scale(1.04);
 }
 
@@ -421,7 +421,7 @@ body {
 }
 
 .stat-card {
-  background: linear-gradient(135deg, var(--primary), var(--green));
+  background: linear-gradient(45deg, var(--primary), rgb(253, 209, 216));
   color: white;
   padding: 26px 18px;
   border-radius: 14px;
