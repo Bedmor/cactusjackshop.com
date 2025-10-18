@@ -3,6 +3,8 @@ const ADMIN_PASSWORD = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f
 // Current editing product ID
 let editingProductId = null;
 let editingCommentId = null;
+// Product media gallery
+let productMediaGallery = [];
 
 // Check if user is logged in
 document.addEventListener('DOMContentLoaded', () => {
@@ -250,69 +252,148 @@ async function loadProducts() {
 
 // Setup image/video upload handlers
 function setupImageUploadHandlers() {
-  const fileInput = document.getElementById('productImageFile');
-  const urlInput = document.getElementById('productImage');
-  const imagePreview = document.getElementById('imagePreview');
-  const previewImg = document.getElementById('previewImg');
-  const previewVideo = document.getElementById('previewVideo');
+  const multiFileInput = document.getElementById('productMediaFiles');
+  const mediaGalleryPreview = document.getElementById('mediaGalleryPreview');
+  const mediaGalleryGrid = document.getElementById('mediaGalleryGrid');
 
-  // File input change handler
-  fileInput?.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
+  // Multiple files input change handler
+  multiFileInput?.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    mediaGalleryPreview.style.display = 'block';
+    
+    // Preview all selected files
+    for (const file of files) {
       const isVideo = file.type.startsWith('video/');
-
-      // Show preview
       const reader = new FileReader();
+      
       reader.onload = (event) => {
-        if (isVideo) {
-          // Show video preview
-          previewVideo.src = event.target.result;
-          previewVideo.style.display = 'block';
-          previewImg.style.display = 'none';
-        } else {
-          // Show image preview
-          previewImg.src = event.target.result;
-          previewImg.style.display = 'block';
-          previewVideo.style.display = 'none';
-        }
-        imagePreview.style.display = 'block';
+        // Add to gallery array
+        productMediaGallery.push({
+          file: file,
+          url: event.target.result,
+          type: isVideo ? 'video' : 'image',
+          isPrimary: productMediaGallery.length === 0 // First one is primary
+        });
+        
+        renderMediaGallery();
       };
+      
       reader.readAsDataURL(file);
-
-      // Clear URL input since we're using file
-      urlInput.value = '';
     }
+    
+    // Clear input so same files can be selected again
+    e.target.value = '';
   });
+}
 
-  // URL input handler - show preview
-  urlInput?.addEventListener('input', (e) => {
-    const url = e.target.value;
-    if (url) {
-      // Check if URL is a video
-      const isVideo = url.match(/\.(mp4|webm|mov|ogg)(\?|$)/i);
-
-      if (isVideo) {
-        previewVideo.src = url;
-        previewVideo.style.display = 'block';
-        previewImg.style.display = 'none';
-      } else {
-        previewImg.src = url;
-        previewImg.style.display = 'block';
-        previewVideo.style.display = 'none';
+function renderMediaGallery() {
+  const mediaGalleryGrid = document.getElementById('mediaGalleryGrid');
+  const mediaGalleryPreview = document.getElementById('mediaGalleryPreview');
+  
+  if (productMediaGallery.length === 0) {
+    mediaGalleryPreview.style.display = 'none';
+    return;
+  }
+  
+  mediaGalleryPreview.style.display = 'block';
+  
+  mediaGalleryGrid.innerHTML = productMediaGallery.map((media, index) => `
+    <div class="media-gallery-item" style="
+      position: relative;
+      border: 3px solid ${media.isPrimary ? 'var(--primary)' : '#ddd'};
+      border-radius: 8px;
+      overflow: hidden;
+      aspect-ratio: 1;
+      cursor: grab;
+    " draggable="true" ondragstart="dragStartMedia(event, ${index})" ondragover="dragOverMedia(event)" ondrop="dropMedia(event, ${index})">
+      ${media.type === 'video' 
+        ? `<video src="${media.url}" style="width: 100%; height: 100%; object-fit: cover;" muted></video>`
+        : `<img src="${media.url}" style="width: 100%; height: 100%; object-fit: cover;" />`
       }
-      imagePreview.style.display = 'block';
-      // Clear file input
-      fileInput.value = '';
-    }
+      ${media.isPrimary ? '<div style="position: absolute; top: 5px; left: 5px; background: var(--primary); color: var(--dark-brown); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">ANA</div>' : ''}
+      <button onclick="removeMediaItem(${index})" style="
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: #d32f2f;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+      ">×</button>
+      <button onclick="setPrimaryMedia(${index})" style="
+        position: absolute;
+        bottom: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.7);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 0.7rem;
+        ${media.isPrimary ? 'display: none;' : ''}
+      ">Ana Yap</button>
+    </div>
+  `).join('');
+}
+
+function removeMediaItem(index) {
+  productMediaGallery.splice(index, 1);
+  // If removed item was primary, make first item primary
+  if (productMediaGallery.length > 0 && !productMediaGallery.some(m => m.isPrimary)) {
+    productMediaGallery[0].isPrimary = true;
+  }
+  renderMediaGallery();
+}
+
+function setPrimaryMedia(index) {
+  productMediaGallery.forEach((media, i) => {
+    media.isPrimary = (i === index);
   });
+  renderMediaGallery();
+}
+
+// Drag and drop functions for reordering
+let draggedMediaIndex = null;
+
+function dragStartMedia(event, index) {
+  draggedMediaIndex = index;
+  event.dataTransfer.effectAllowed = 'move';
+}
+
+function dragOverMedia(event) {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+}
+
+function dropMedia(event, dropIndex) {
+  event.preventDefault();
+  if (draggedMediaIndex === null || draggedMediaIndex === dropIndex) return;
+  
+  // Reorder array
+  const draggedItem = productMediaGallery[draggedMediaIndex];
+  productMediaGallery.splice(draggedMediaIndex, 1);
+  productMediaGallery.splice(dropIndex, 0, draggedItem);
+  
+  draggedMediaIndex = null;
+  renderMediaGallery();
 }
 
 // Open add product modal
 function openAddProductModal() {
   editingProductId = null;
+  productMediaGallery = [];
   document.getElementById('modalTitle').textContent = 'Yeni Ürün Ekle';
   document.getElementById('productForm').reset();
+  document.getElementById('mediaGalleryPreview').style.display = 'none';
   document.getElementById('productModal').classList.add('active');
 }
 
@@ -324,29 +405,33 @@ async function editProduct(productId) {
     if (!product) return;
 
     editingProductId = productId;
+    productMediaGallery = [];
+    
     document.getElementById('modalTitle').textContent = 'Ürünü Düzenle';
     document.getElementById('productName').value = product.name;
     document.getElementById('productDescription').value = product.description;
     document.getElementById('productPrice').value = product.price;
     document.getElementById('productStock').value = product.stock;
-    document.getElementById('productImage').value = product.image;
 
-    // Show image/video preview if exists
-    if (product.image) {
-      const previewImg = document.getElementById('previewImg');
-      const previewVideo = document.getElementById('previewVideo');
+    // Load existing media gallery
+    if (product.media && Array.isArray(product.media) && product.media.length > 0) {
+      productMediaGallery = product.media.map(mediaItem => ({
+        url: mediaItem.url,
+        type: mediaItem.type || (mediaItem.url.match(/\.(mp4|webm|mov|ogg)(\?|$)/i) ? 'video' : 'image'),
+        isPrimary: mediaItem.isPrimary || false,
+        isExisting: true // Mark as existing (not a new file)
+      }));
+      renderMediaGallery();
+    } else if (product.image) {
+      // Fallback to old single image format
       const isVideo = product.image.match(/\.(mp4|webm|mov|ogg)(\?|$)/i);
-
-      if (isVideo) {
-        previewVideo.src = product.image;
-        previewVideo.style.display = 'block';
-        previewImg.style.display = 'none';
-      } else {
-        previewImg.src = product.image;
-        previewImg.style.display = 'block';
-        previewVideo.style.display = 'none';
-      }
-      document.getElementById('imagePreview').style.display = 'block';
+      productMediaGallery = [{
+        url: product.image,
+        type: isVideo ? 'video' : 'image',
+        isPrimary: true,
+        isExisting: true
+      }];
+      renderMediaGallery();
     }
 
     document.getElementById('productModal').classList.add('active');
@@ -390,47 +475,56 @@ async function saveProduct(event) {
   const description = document.getElementById('productDescription').value;
   const price = parseFloat(document.getElementById('productPrice').value);
   const stock = parseInt(document.getElementById('productStock').value);
-  let imageUrl = document.getElementById('productImage').value;
-  const imageFile = document.getElementById('productImageFile')?.files[0];
 
   try {
-    // Upload image if file is selected
-    if (imageFile && typeof storageHelper !== 'undefined') {
-      showUploadProgress(true);
+    if (productMediaGallery.length === 0) {
+      throw new Error('Lütfen en az bir medya dosyası ekleyin');
+    }
 
-      try {
-        // If editing, get old product to delete old image
-        if (editingProductId) {
-          const oldProduct = await db.getProduct(editingProductId);
-          if (oldProduct && oldProduct.image) {
-            await storageHelper.deleteImage(oldProduct.image);
-          }
+    showUploadProgress(true);
+
+    // Upload new media files
+    const uploadedMedia = [];
+    for (let i = 0; i < productMediaGallery.length; i++) {
+      const media = productMediaGallery[i];
+      
+      if (media.isExisting) {
+        // Keep existing media
+        uploadedMedia.push({
+          url: media.url,
+          type: media.type,
+          isPrimary: media.isPrimary
+        });
+      } else if (media.file) {
+        // Upload new file
+        try {
+          const url = await storageHelper.uploadCompressedImage(
+            media.file,
+            `${editingProductId || 'new'}-${i}`
+          );
+          uploadedMedia.push({
+            url: url,
+            type: media.type,
+            isPrimary: media.isPrimary
+          });
+        } catch (uploadError) {
+          throw new Error(`Medya yüklenirken hata (${i + 1}): ` + uploadError.message);
         }
-
-        // Upload new image with compression
-        imageUrl = await storageHelper.uploadCompressedImage(
-          imageFile,
-          editingProductId || 'new'
-        );
-
-        showUploadProgress(false);
-      } catch (uploadError) {
-        showUploadProgress(false);
-        throw new Error('Resim yüklenirken hata: ' + uploadError.message);
       }
     }
 
-    // Validate image URL
-    if (!imageUrl) {
-      throw new Error('Lütfen bir resim dosyası seçin veya URL girin');
-    }
+    showUploadProgress(false);
+
+    // Find primary media or use first one
+    const primaryMedia = uploadedMedia.find(m => m.isPrimary) || uploadedMedia[0];
 
     const productData = {
       name,
       description,
       price,
       stock,
-      image: imageUrl
+      image: primaryMedia.url, // Backward compatibility
+      media: uploadedMedia
     };
 
     if (editingProductId) {
@@ -447,6 +541,7 @@ async function saveProduct(event) {
   } catch (error) {
     console.error('Error saving product:', error);
     alert('❌ ' + error.message);
+    showUploadProgress(false);
   }
 }
 
@@ -483,10 +578,9 @@ function showUploadProgress(show) {
 function closeModal() {
   document.getElementById('productModal').classList.remove('active');
   document.getElementById('productForm').reset();
-  document.getElementById('imagePreview').style.display = 'none';
-  document.getElementById('previewImg').style.display = 'none';
-  document.getElementById('previewVideo').style.display = 'none';
+  document.getElementById('mediaGalleryPreview').style.display = 'none';
   document.getElementById('uploadProgress').style.display = 'none';
+  productMediaGallery = [];
   editingProductId = null;
 }
 

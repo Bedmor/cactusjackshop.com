@@ -214,13 +214,47 @@ async function loadProducts() {
             return;
         }
 
-        productsGrid.innerHTML = products.map(product => {
-            // Check if media is a video
-            const isVideo = product.image && product.image.match(/\.(mp4|webm|mov|ogg)(\?|$)/i);
+        productsGrid.innerHTML = products.map((product, index) => {
+            // Check if product has media gallery
+            const mediaArray = product.media || (product.image ? [{ url: product.image, type: product.image.match(/\.(mp4|webm|mov|ogg)(\?|$)/i) ? 'video' : 'image', isPrimary: true }] : []);
+            
+            let mediaHtml;
+            if (mediaArray.length > 1) {
+                // Multiple media - create carousel
+                const mediaCarouselItems = mediaArray.map((media, mediaIndex) => {
+                    const isVideo = media.type === 'video';
+                    return isVideo
+                        ? `<video src="${media.url}" class="product-media-item" autoplay loop muted playsinline onerror="this.style.display='none'"></video>`
+                        : `<img src="${media.url}" alt="${product.name}" class="product-media-item" onerror="this.src='assets/100mg.png'">`;
+                }).join('');
 
-            const mediaHtml = isVideo
-                ? `<video src="${product.image}" class="product-image" autoplay loop muted playsinline onerror="this.style.display='none'"></video>`
-                : `<img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='assets/100mg.png'">`;
+                const dotsHtml = mediaArray.map((_, dotIndex) => 
+                    `<span class="media-dot ${dotIndex === 0 ? 'active' : ''}" onclick="goToMediaSlide(${index}, ${dotIndex})"></span>`
+                ).join('');
+
+                mediaHtml = `
+                    <div class="product-media-carousel" data-product-index="${index}">
+                        <div class="media-carousel-track" data-current-slide="0">
+                            ${mediaCarouselItems}
+                        </div>
+                        ${mediaArray.length > 1 ? `
+                        <button class="media-carousel-btn media-prev" onclick="prevMediaSlide(${index})" aria-label="Previous">‹</button>
+                        <button class="media-carousel-btn media-next" onclick="nextMediaSlide(${index})" aria-label="Next">›</button>
+                        <div class="media-dots">${dotsHtml}</div>
+                        ` : ''}
+                    </div>
+                `;
+            } else if (mediaArray.length === 1) {
+                // Single media - backward compatible
+                const media = mediaArray[0];
+                const isVideo = media.type === 'video';
+                mediaHtml = isVideo
+                    ? `<video src="${media.url}" class="product-image" autoplay loop muted playsinline onerror="this.style.display='none'"></video>`
+                    : `<img src="${media.url}" alt="${product.name}" class="product-image" onerror="this.src='assets/100mg.png'">`;
+            } else {
+                // No media - fallback image
+                mediaHtml = `<img src="assets/100mg.png" alt="${product.name}" class="product-image">`;
+            }
 
             return `
       <div class="product-card">
@@ -241,10 +275,93 @@ async function loadProducts() {
       </div>
     `;
         }).join('');
+        
+        // Initialize swipe support for carousels after rendering
+        setTimeout(() => initMediaCarouselSwipe(), 100);
     } catch (error) {
         console.error('Error loading products:', error);
         productsGrid.innerHTML = '<p style="text-align: center; color: #d32f2f; grid-column: 1/-1;">❌ Ürünler yüklenirken hata oluştu. Lütfen sayfayı yenileyin.</p>';
     }
+}
+
+// Product media carousel navigation functions
+function nextMediaSlide(productIndex) {
+    const carousel = document.querySelector(`.product-media-carousel[data-product-index="${productIndex}"]`);
+    if (!carousel) return;
+    
+    const track = carousel.querySelector('.media-carousel-track');
+    const items = track.querySelectorAll('.product-media-item');
+    const currentSlide = parseInt(track.dataset.currentSlide);
+    const nextSlide = (currentSlide + 1) % items.length;
+    
+    updateMediaSlide(productIndex, nextSlide);
+}
+
+function prevMediaSlide(productIndex) {
+    const carousel = document.querySelector(`.product-media-carousel[data-product-index="${productIndex}"]`);
+    if (!carousel) return;
+    
+    const track = carousel.querySelector('.media-carousel-track');
+    const items = track.querySelectorAll('.product-media-item');
+    const currentSlide = parseInt(track.dataset.currentSlide);
+    const prevSlide = (currentSlide - 1 + items.length) % items.length;
+    
+    updateMediaSlide(productIndex, prevSlide);
+}
+
+function goToMediaSlide(productIndex, slideIndex) {
+    updateMediaSlide(productIndex, slideIndex);
+}
+
+function updateMediaSlide(productIndex, slideIndex) {
+    const carousel = document.querySelector(`.product-media-carousel[data-product-index="${productIndex}"]`);
+    if (!carousel) return;
+    
+    const track = carousel.querySelector('.media-carousel-track');
+    const items = track.querySelectorAll('.product-media-item');
+    const dots = carousel.querySelectorAll('.media-dot');
+    
+    // Update track position
+    track.dataset.currentSlide = slideIndex;
+    track.style.transform = `translateX(-${slideIndex * 100}%)`;
+    
+    // Update dots
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === slideIndex);
+    });
+}
+
+// Initialize touch swipe support for media carousels
+function initMediaCarouselSwipe() {
+    document.querySelectorAll('.product-media-carousel').forEach(carousel => {
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const productIndex = parseInt(carousel.dataset.productIndex);
+        
+        carousel.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        
+        carousel.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe(productIndex);
+        }, { passive: true });
+        
+        function handleSwipe(index) {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe left - next slide
+                    nextMediaSlide(index);
+                } else {
+                    // Swipe right - previous slide
+                    prevMediaSlide(index);
+                }
+            }
+        }
+    });
 }
 
 // Add product to cart

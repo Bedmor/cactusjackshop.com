@@ -705,6 +705,97 @@ video.product-image:hover {
   cursor: not-allowed;
 }
 
+/* Product Media Carousel Styles */
+.product-media-carousel {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  background: var(--cream);
+}
+
+.media-carousel-track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+}
+
+.product-media-item {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--cream);
+}
+
+.media-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  color: #34403a;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.media-carousel-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.media-prev {
+  left: 10px;
+}
+
+.media-next {
+  right: 10px;
+}
+
+.media-dots {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.media-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(52, 64, 58, 0.3);
+}
+
+.media-dot:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.2);
+}
+
+.media-dot.active {
+  background: rgba(255, 255, 255, 1);
+  border-color: #34403a;
+  transform: scale(1.3);
+}
+
 .cart-sidebar {
   position: fixed;
   right: -400px;
@@ -1215,6 +1306,31 @@ video.cart-item-image {
     max-width: 200px;
     flex-shrink: 0;
     margin: 0 20px;
+  }
+
+  /* Mobile Media Carousel Adjustments */
+  .media-carousel-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+
+  .media-prev {
+    left: 5px;
+  }
+
+  .media-next {
+    right: 5px;
+  }
+
+  .media-dots {
+    bottom: 8px;
+    gap: 6px;
+  }
+
+  .media-dot {
+    width: 8px;
+    height: 8px;
   }
 
   .shop-header h1 {
