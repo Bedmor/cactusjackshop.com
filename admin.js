@@ -680,7 +680,7 @@ async function uploadHeroBackground(file) {
 
   if (!isVideo) {
     // Compress image before upload
-    const compressedFile = await compressImage(file);
+    const compressedFile = await storageHelper.compressImage(file);
 
     const { data, error } = await supabase.storage
       .from(bucketName)
