@@ -1093,6 +1093,7 @@ video.cart-item-image {
   display: flex;
   align-items: center;
   justify-content: center;
+  transform-origin: center center;
 }
 
 .close-contact-modal:hover {
@@ -1168,7 +1169,7 @@ video.cart-item-image {
 
 .social-btn {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   gap: 8px;
   padding: 15px;
@@ -1188,11 +1189,13 @@ video.cart-item-image {
 }
 
 .social-icon {
-  font-size: 2rem;
+  max-width: 65%;
+  height: auto;
+  object-fit: contain;
 }
 
 .social-label {
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-muted);
 }
