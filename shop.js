@@ -217,7 +217,7 @@ async function loadProducts() {
         productsGrid.innerHTML = products.map((product, index) => {
             // Check if product has media gallery
             const mediaArray = product.media || (product.image ? [{ url: product.image, type: product.image.match(/\.(mp4|webm|mov|ogg)(\?|$)/i) ? 'video' : 'image', isPrimary: true }] : []);
-            
+
             let mediaHtml;
             if (mediaArray.length > 1) {
                 // Multiple media - create carousel
@@ -228,7 +228,7 @@ async function loadProducts() {
                         : `<img src="${media.url}" alt="${product.name}" class="product-media-item" onerror="this.src='assets/100mg.png'">`;
                 }).join('');
 
-                const dotsHtml = mediaArray.map((_, dotIndex) => 
+                const dotsHtml = mediaArray.map((_, dotIndex) =>
                     `<span class="media-dot ${dotIndex === 0 ? 'active' : ''}" onclick="goToMediaSlide(${index}, ${dotIndex})"></span>`
                 ).join('');
 
@@ -275,7 +275,7 @@ async function loadProducts() {
       </div>
     `;
         }).join('');
-        
+
         // Initialize swipe support for carousels after rendering
         setTimeout(() => initMediaCarouselSwipe(), 100);
     } catch (error) {
@@ -288,24 +288,24 @@ async function loadProducts() {
 function nextMediaSlide(productIndex) {
     const carousel = document.querySelector(`.product-media-carousel[data-product-index="${productIndex}"]`);
     if (!carousel) return;
-    
+
     const track = carousel.querySelector('.media-carousel-track');
     const items = track.querySelectorAll('.product-media-item');
     const currentSlide = parseInt(track.dataset.currentSlide);
     const nextSlide = (currentSlide + 1) % items.length;
-    
+
     updateMediaSlide(productIndex, nextSlide);
 }
 
 function prevMediaSlide(productIndex) {
     const carousel = document.querySelector(`.product-media-carousel[data-product-index="${productIndex}"]`);
     if (!carousel) return;
-    
+
     const track = carousel.querySelector('.media-carousel-track');
     const items = track.querySelectorAll('.product-media-item');
     const currentSlide = parseInt(track.dataset.currentSlide);
     const prevSlide = (currentSlide - 1 + items.length) % items.length;
-    
+
     updateMediaSlide(productIndex, prevSlide);
 }
 
@@ -316,15 +316,15 @@ function goToMediaSlide(productIndex, slideIndex) {
 function updateMediaSlide(productIndex, slideIndex) {
     const carousel = document.querySelector(`.product-media-carousel[data-product-index="${productIndex}"]`);
     if (!carousel) return;
-    
+
     const track = carousel.querySelector('.media-carousel-track');
     const items = track.querySelectorAll('.product-media-item');
     const dots = carousel.querySelectorAll('.media-dot');
-    
+
     // Update track position
     track.dataset.currentSlide = slideIndex;
     track.style.transform = `translateX(-${slideIndex * 100}%)`;
-    
+
     // Update dots
     dots.forEach((dot, index) => {
         dot.classList.toggle('active', index === slideIndex);
@@ -337,20 +337,20 @@ function initMediaCarouselSwipe() {
         let touchStartX = 0;
         let touchEndX = 0;
         const productIndex = parseInt(carousel.dataset.productIndex);
-        
+
         carousel.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
-        
+
         carousel.addEventListener('touchend', (e) => {
             touchEndX = e.changedTouches[0].screenX;
             handleSwipe(productIndex);
         }, { passive: true });
-        
+
         function handleSwipe(index) {
             const swipeThreshold = 50;
             const diff = touchStartX - touchEndX;
-            
+
             if (Math.abs(diff) > swipeThreshold) {
                 if (diff > 0) {
                     // Swipe left - next slide

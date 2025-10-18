@@ -262,12 +262,12 @@ function setupImageUploadHandlers() {
     if (files.length === 0) return;
 
     mediaGalleryPreview.style.display = 'block';
-    
+
     // Preview all selected files
     for (const file of files) {
       const isVideo = file.type.startsWith('video/');
       const reader = new FileReader();
-      
+
       reader.onload = (event) => {
         // Add to gallery array
         productMediaGallery.push({
@@ -276,13 +276,13 @@ function setupImageUploadHandlers() {
           type: isVideo ? 'video' : 'image',
           isPrimary: productMediaGallery.length === 0 // First one is primary
         });
-        
+
         renderMediaGallery();
       };
-      
+
       reader.readAsDataURL(file);
     }
-    
+
     // Clear input so same files can be selected again
     e.target.value = '';
   });
@@ -291,14 +291,14 @@ function setupImageUploadHandlers() {
 function renderMediaGallery() {
   const mediaGalleryGrid = document.getElementById('mediaGalleryGrid');
   const mediaGalleryPreview = document.getElementById('mediaGalleryPreview');
-  
+
   if (productMediaGallery.length === 0) {
     mediaGalleryPreview.style.display = 'none';
     return;
   }
-  
+
   mediaGalleryPreview.style.display = 'block';
-  
+
   mediaGalleryGrid.innerHTML = productMediaGallery.map((media, index) => `
     <div class="media-gallery-item" style="
       position: relative;
@@ -308,10 +308,10 @@ function renderMediaGallery() {
       aspect-ratio: 1;
       cursor: grab;
     " draggable="true" ondragstart="dragStartMedia(event, ${index})" ondragover="dragOverMedia(event)" ondrop="dropMedia(event, ${index})">
-      ${media.type === 'video' 
-        ? `<video src="${media.url}" style="width: 100%; height: 100%; object-fit: cover;" muted></video>`
-        : `<img src="${media.url}" style="width: 100%; height: 100%; object-fit: cover;" />`
-      }
+      ${media.type === 'video'
+      ? `<video src="${media.url}" style="width: 100%; height: 100%; object-fit: cover;" muted></video>`
+      : `<img src="${media.url}" style="width: 100%; height: 100%; object-fit: cover;" />`
+    }
       ${media.isPrimary ? '<div style="position: absolute; top: 5px; left: 5px; background: var(--primary); color: var(--dark-brown); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">ANA</div>' : ''}
       <button onclick="removeMediaItem(${index})" style="
         position: absolute;
@@ -377,12 +377,12 @@ function dragOverMedia(event) {
 function dropMedia(event, dropIndex) {
   event.preventDefault();
   if (draggedMediaIndex === null || draggedMediaIndex === dropIndex) return;
-  
+
   // Reorder array
   const draggedItem = productMediaGallery[draggedMediaIndex];
   productMediaGallery.splice(draggedMediaIndex, 1);
   productMediaGallery.splice(dropIndex, 0, draggedItem);
-  
+
   draggedMediaIndex = null;
   renderMediaGallery();
 }
@@ -406,7 +406,7 @@ async function editProduct(productId) {
 
     editingProductId = productId;
     productMediaGallery = [];
-    
+
     document.getElementById('modalTitle').textContent = 'Ürünü Düzenle';
     document.getElementById('productName').value = product.name;
     document.getElementById('productDescription').value = product.description;
@@ -487,7 +487,7 @@ async function saveProduct(event) {
     const uploadedMedia = [];
     for (let i = 0; i < productMediaGallery.length; i++) {
       const media = productMediaGallery[i];
-      
+
       if (media.isExisting) {
         // Keep existing media
         uploadedMedia.push({
