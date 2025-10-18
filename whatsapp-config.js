@@ -11,10 +11,10 @@
 // ⚠️ CHANGE THIS NUMBER TO YOUR WHATSAPP BUSINESS NUMBER
 const WHATSAPP_CONFIG = {
     // Your WhatsApp number (format: country code + number)
-    number: '905550200605', // CHANGE THIS!
+    number: '905327958765', // CHANGE THIS!
 
     // Optional: Custom message prefix
-    messagePrefix: '🛍️ *Yeni Sipariş*\n\n',
+    messagePrefix: '*Yeni Sipariş*\n\n',
 
     // Optional: Custom message suffix
     messageSuffix: '\n\nTeşekkürler!',
