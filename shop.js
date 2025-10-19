@@ -350,8 +350,8 @@ async function loadProducts() {
                 const mediaCarouselItems = mediaArray.map((media, mediaIndex) => {
                     const isVideo = media.type === 'video';
                     return isVideo
-                        ? `<video src="${media.url}" class="product-media-item" autoplay loop muted playsinline onerror="this.style.display='none'"></video>`
-                        : `<img src="${media.url}" alt="${product.name}" class="product-media-item" onerror="this.src='assets/100mg.png'">`;
+                        ? `<video src="${media.url}" class="product-media-item clickable-media" data-media-url="${media.url}" data-media-type="video" autoplay loop muted playsinline onerror="this.style.display='none'"></video>`
+                        : `<img src="${media.url}" alt="${product.name}" class="product-media-item clickable-media" data-media-url="${media.url}" data-media-type="image" onerror="this.src='assets/100mg.png'">`;
                 }).join('');
 
                 const dotsHtml = mediaArray.map((_, dotIndex) =>
@@ -375,8 +375,8 @@ async function loadProducts() {
                 const media = mediaArray[0];
                 const isVideo = media.type === 'video';
                 mediaHtml = isVideo
-                    ? `<video src="${media.url}" class="product-image" autoplay loop muted playsinline onerror="this.style.display='none'"></video>`
-                    : `<img src="${media.url}" alt="${product.name}" class="product-image" onerror="this.src='assets/100mg.png'">`;
+                    ? `<video src="${media.url}" class="product-image clickable-media" data-media-url="${media.url}" data-media-type="video" autoplay loop muted playsinline onerror="this.style.display='none'"></video>`
+                    : `<img src="${media.url}" alt="${product.name}" class="product-image clickable-media" data-media-url="${media.url}" data-media-type="image" onerror="this.src='assets/100mg.png'">`;
             } else {
                 // No media - fallback image
                 mediaHtml = `<img src="assets/100mg.png" alt="${product.name}" class="product-image">`;
@@ -805,5 +805,63 @@ loadProducts = async function () {
     // Wait a bit for DOM to update
     setTimeout(() => {
         initProductsCarousel();
+        initImageLightbox();
     }, 100);
 };
+
+// Image Lightbox Functionality
+function initImageLightbox() {
+    const lightbox = document.getElementById('imageLightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const lightboxVideo = document.getElementById('lightboxVideo');
+    const lightboxClose = document.getElementById('lightboxClose');
+
+    // Add click event to all clickable media
+    document.querySelectorAll('.clickable-media').forEach(media => {
+        media.style.cursor = 'pointer';
+        media.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const mediaUrl = this.dataset.mediaUrl;
+            const mediaType = this.dataset.mediaType;
+
+            if (mediaType === 'video') {
+                lightboxImage.style.display = 'none';
+                lightboxVideo.style.display = 'block';
+                lightboxVideo.src = mediaUrl;
+            } else {
+                lightboxVideo.style.display = 'none';
+                lightboxImage.style.display = 'block';
+                lightboxImage.src = mediaUrl;
+            }
+
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    // Close lightbox
+    function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+        lightboxVideo.pause();
+        lightboxVideo.src = '';
+        lightboxImage.src = '';
+    }
+
+    lightboxClose.addEventListener('click', closeLightbox);
+
+    // Close on background click
+    lightbox.addEventListener('click', function (e) {
+        if (e.target === lightbox) {
+            closeLightbox();
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+            closeLightbox();
+        }
+    });
+}
+
