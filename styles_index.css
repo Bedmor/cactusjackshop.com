@@ -1,8 +1,18 @@
+@font-face {
+  font-family: Arsis DReg;
+  src: url(assets/Arsis-DReg-Regular.ttf);
+  font-weight: 700;
+}
+
+/* Set base font size on html for rem scaling */
+html {
+  font-size: 24px; /* Increased from default 16px - all rem values will scale up */
+}
+
 body {
   margin: 0;
   padding: 0;
   background-color: var(--bg-light);
-  font-family: "Oxygen", sans-serif;
   scroll-behavior: smooth;
 }
 
@@ -507,7 +517,6 @@ body {
   font-size: 4rem;
   margin: 0 auto;
   color: var(--text-dark);
-  font-family: "Oxygen", sans-serif;
   font-style: normal;
   font-weight: 400;
 }
@@ -576,7 +585,7 @@ body {
 .desktop-nav a {
   text-decoration: none;
   color: var(--text-dark);
-  font-size: 1.1rem;
+  font-size: 2rem;
   font-weight: 600;
   display: flex;
   align-items: center;
