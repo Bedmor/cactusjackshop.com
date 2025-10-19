@@ -47,6 +47,7 @@ async function loadCustomFont() {
 document.addEventListener('DOMContentLoaded', async () => {
     await loadCustomFont();
     await loadProducts();
+    await loadProductShowcase();
     await loadComments();
     updateCartUI();
 
@@ -490,6 +491,82 @@ function initMediaCarouselSwipe() {
     });
 }
 
+// Load and populate rotating product showcase
+async function loadProductShowcase() {
+    const showcaseTrack = document.getElementById('showcaseTrack');
+    if (!showcaseTrack) return;
+
+    try {
+        // Use already loaded products, or fetch if not available
+        const showcaseProducts = products.length > 0 ? products : await db.getProducts();
+
+        if (showcaseProducts.length === 0) {
+            showcaseTrack.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Henüz ürün bulunmamaktadır.</p>';
+            return;
+        }
+
+        // Duplicate products for seamless infinite scroll
+        const duplicatedProducts = Array(Math.ceil(10 / showcaseProducts.length)).fill(showcaseProducts).flat();
+
+        const showcaseHtml = duplicatedProducts.map((product, index) => {
+            // Get primary media
+            const mediaArray = product.media || (product.image ? [{ url: product.image, type: product.image.match(/\.(mp4|webm|mov|ogg)(\?|$)/i) ? 'video' : 'image', isPrimary: true }] : []);
+            const primaryMedia = mediaArray.find(m => m.isPrimary) || mediaArray[0] || { url: 'assets/100mg.png', type: 'image' };
+
+            const isVideo = primaryMedia.type === 'video';
+            const mediaHtml = isVideo
+                ? `<video src="${primaryMedia.url}" class="showcase-item-image" autoplay loop muted playsinline onerror="this.style.display='none'"></video>`
+                : `<img src="${primaryMedia.url}" alt="${product.name}" class="showcase-item-image" onerror="this.src='assets/100mg.png'">`;
+
+            // Add badge if stock is low or out
+            const badgeHtml = product.stock === 0
+                ? '<div class="showcase-item-badge">Stokta Yok</div>'
+                : product.stock < 5
+                    ? '<div class="showcase-item-badge">Son Ürünler!</div>'
+                    : '';
+
+            return `
+                <div class="showcase-item" onclick="scrollToProduct(${product.id})">
+                    ${badgeHtml}
+                    ${mediaHtml}
+                    <div class="showcase-item-info">
+                        <div class="showcase-item-name">${product.name}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        showcaseTrack.innerHTML = showcaseHtml;
+    } catch (error) {
+        console.error('Error loading product showcase:', error);
+        showcaseTrack.innerHTML = '<p style="text-align: center; color: #d32f2f; padding: 40px;">❌ Vitrin yüklenirken hata oluştu.</p>';
+    }
+}
+
+// Scroll to product when showcase item is clicked
+function scrollToProduct(productId) {
+    const productsSection = document.querySelector('.shop-container');
+    if (productsSection) {
+        productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Highlight the product card briefly
+        setTimeout(() => {
+            const productCards = document.querySelectorAll('.product-card');
+            const productIndex = products.findIndex(p => p.id === productId);
+            if (productIndex !== -1 && productCards[productIndex]) {
+                productCards[productIndex].style.transition = 'all 0.3s ease';
+                productCards[productIndex].style.transform = 'scale(1.05)';
+                productCards[productIndex].style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.3)';
+
+                setTimeout(() => {
+                    productCards[productIndex].style.transform = '';
+                    productCards[productIndex].style.boxShadow = '';
+                }, 1000);
+            }
+        }, 500);
+    }
+}
+
 // Add product to cart
 function addToCart(productId) {
     const product = products.find(p => p.id === productId);
@@ -810,34 +887,88 @@ loadProducts = async function () {
 };
 
 // Image Lightbox Functionality
+let currentLightboxIndex = 0;
+let lightboxMediaArray = [];
+
 function initImageLightbox() {
     const lightbox = document.getElementById('imageLightbox');
     const lightboxImage = document.getElementById('lightboxImage');
     const lightboxVideo = document.getElementById('lightboxVideo');
     const lightboxClose = document.getElementById('lightboxClose');
+    const lightboxPrev = document.getElementById('lightboxPrev');
+    const lightboxNext = document.getElementById('lightboxNext');
+    const lightboxCounter = document.getElementById('lightboxCounter');
 
     // Add click event to all clickable media
     document.querySelectorAll('.clickable-media').forEach(media => {
         media.style.cursor = 'pointer';
         media.addEventListener('click', function (e) {
             e.stopPropagation();
-            const mediaUrl = this.dataset.mediaUrl;
-            const mediaType = this.dataset.mediaType;
 
-            if (mediaType === 'video') {
-                lightboxImage.style.display = 'none';
-                lightboxVideo.style.display = 'block';
-                lightboxVideo.src = mediaUrl;
+            // Find all media in the same product card
+            const productCard = this.closest('.product-card');
+            if (productCard) {
+                lightboxMediaArray = Array.from(productCard.querySelectorAll('.clickable-media'));
+                currentLightboxIndex = lightboxMediaArray.indexOf(this);
             } else {
-                lightboxVideo.style.display = 'none';
-                lightboxImage.style.display = 'block';
-                lightboxImage.src = mediaUrl;
+                // Single media
+                lightboxMediaArray = [this];
+                currentLightboxIndex = 0;
             }
 
+            showLightboxMedia(currentLightboxIndex);
             lightbox.classList.add('active');
             document.body.style.overflow = 'hidden';
+            updateLightboxControls();
         });
     });
+
+    // Show media at specific index
+    function showLightboxMedia(index) {
+        const media = lightboxMediaArray[index];
+        const mediaUrl = media.dataset.mediaUrl;
+        const mediaType = media.dataset.mediaType;
+
+        if (mediaType === 'video') {
+            lightboxImage.style.display = 'none';
+            lightboxVideo.style.display = 'block';
+            lightboxVideo.src = mediaUrl;
+        } else {
+            lightboxVideo.style.display = 'none';
+            lightboxImage.style.display = 'block';
+            lightboxImage.src = mediaUrl;
+        }
+
+        updateLightboxControls();
+    }
+
+    // Update navigation controls visibility
+    function updateLightboxControls() {
+        const hasMultipleMedia = lightboxMediaArray.length > 1;
+
+        if (hasMultipleMedia) {
+            lightboxPrev.classList.add('visible');
+            lightboxNext.classList.add('visible');
+            lightboxCounter.classList.add('visible');
+            lightboxCounter.textContent = `${currentLightboxIndex + 1} / ${lightboxMediaArray.length}`;
+        } else {
+            lightboxPrev.classList.remove('visible');
+            lightboxNext.classList.remove('visible');
+            lightboxCounter.classList.remove('visible');
+        }
+    }
+
+    // Navigate to previous media
+    function showPreviousMedia() {
+        currentLightboxIndex = (currentLightboxIndex - 1 + lightboxMediaArray.length) % lightboxMediaArray.length;
+        showLightboxMedia(currentLightboxIndex);
+    }
+
+    // Navigate to next media
+    function showNextMedia() {
+        currentLightboxIndex = (currentLightboxIndex + 1) % lightboxMediaArray.length;
+        showLightboxMedia(currentLightboxIndex);
+    }
 
     // Close lightbox
     function closeLightbox() {
@@ -846,9 +977,20 @@ function initImageLightbox() {
         lightboxVideo.pause();
         lightboxVideo.src = '';
         lightboxImage.src = '';
+        lightboxMediaArray = [];
+        currentLightboxIndex = 0;
     }
 
+    // Event listeners
     lightboxClose.addEventListener('click', closeLightbox);
+    lightboxPrev.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showPreviousMedia();
+    });
+    lightboxNext.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showNextMedia();
+    });
 
     // Close on background click
     lightbox.addEventListener('click', function (e) {
@@ -857,11 +999,45 @@ function initImageLightbox() {
         }
     });
 
-    // Close on Escape key
+    // Keyboard navigation
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && lightbox.classList.contains('active')) {
-            closeLightbox();
+        if (lightbox.classList.contains('active')) {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            } else if (e.key === 'ArrowLeft') {
+                showPreviousMedia();
+            } else if (e.key === 'ArrowRight') {
+                showNextMedia();
+            }
         }
     });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    lightbox.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    lightbox.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+
+        if (Math.abs(diff) > swipeThreshold && lightboxMediaArray.length > 1) {
+            if (diff > 0) {
+                // Swipe left - next image
+                showNextMedia();
+            } else {
+                // Swipe right - previous image
+                showPreviousMedia();
+            }
+        }
+    }
 }
 

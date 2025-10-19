@@ -81,7 +81,11 @@
         </ul>
       </nav>
     </div>
-
+    <div class="product-showcase">
+      <div class="showcase-track" id="showcaseTrack">
+        <!-- Products will be dynamically loaded here -->
+      </div>
+    </div>
     <!-- Hero Section -->
     <section class="hero-section" id="home">
       <div class="hero-overlay"></div>
@@ -101,6 +105,8 @@
         <p>Ürünleri Görüntüle</p>
       </div>
     </section>
+
+    <!-- Rotating Product Showcase -->
 
     <div class="shop-container">
       <h2 class="products-title">Ürünlerimiz</h2>
@@ -172,10 +178,13 @@
     <!-- Image Lightbox Modal -->
     <div class="image-lightbox" id="imageLightbox">
       <button class="lightbox-close" id="lightboxClose">×</button>
+      <button class="lightbox-nav lightbox-prev" id="lightboxPrev">‹</button>
+      <button class="lightbox-nav lightbox-next" id="lightboxNext">›</button>
       <div class="lightbox-content">
         <img src="" alt="Enlarged view" id="lightboxImage" />
         <video autoplay src="" id="lightboxVideo" controls></video>
       </div>
+      <div class="lightbox-counter" id="lightboxCounter">1 / 1</div>
     </div>
 
     <!-- Contact Modal -->

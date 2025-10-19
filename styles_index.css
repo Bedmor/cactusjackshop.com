@@ -195,6 +195,156 @@ body {
   color: var(--cream);
 }
 
+/* Rotating Product Showcase */
+.product-showcase {
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--bg-light) 0%, var(--cream) 100%);
+  padding: 60px 0;
+  position: relative;
+}
+
+.product-showcase::before,
+.product-showcase::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 150px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.product-showcase::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--bg-light) 0%, transparent 100%);
+}
+
+.product-showcase::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--cream) 0%, transparent 100%);
+}
+
+.showcase-track {
+  display: flex;
+  gap: 30px;
+  animation: scroll-left 40s linear infinite;
+  will-change: transform;
+}
+
+.showcase-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.showcase-item {
+  flex-shrink: 0;
+  width: 280px;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+}
+
+.showcase-item:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.showcase-item-image {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.showcase-item:hover .showcase-item-image {
+  transform: scale(1.1);
+}
+
+video.showcase-item-image {
+  background: #000;
+}
+
+.showcase-item-info {
+  padding: 20px;
+  background: white;
+}
+
+.showcase-item-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--dark-brown);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.showcase-item-price {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.showcase-item-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: var(--primary);
+  color: var(--dark-brown);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .product-showcase {
+    padding: 40px 0;
+  }
+
+  .showcase-track {
+    gap: 20px;
+    animation: scroll-left 30s linear infinite;
+  }
+
+  .showcase-item {
+    width: 220px;
+  }
+
+  .showcase-item-image {
+    height: 220px;
+  }
+
+  .showcase-item-info {
+    padding: 15px;
+  }
+
+  .showcase-item-name {
+    font-size: 1.1rem;
+  }
+
+  .showcase-item-price {
+    font-size: 1.3rem;
+  }
+}
+
 .about {
   width: 100%;
   padding: 40px 0px;
@@ -1607,6 +1757,70 @@ video.cart-item-image {
   color: #d32f2f;
 }
 
+/* Lightbox Navigation Buttons */
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-size: 3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  transition: all 0.3s ease;
+  color: #333;
+  font-weight: 300;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lightbox-nav.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lightbox-nav:hover {
+  background: white;
+  transform: translateY(-50%) scale(1.1);
+  color: var(--primary);
+}
+
+.lightbox-prev {
+  left: 20px;
+}
+
+.lightbox-next {
+  right: 20px;
+}
+
+/* Lightbox Counter */
+.lightbox-counter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 1rem;
+  z-index: 10001;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.lightbox-counter.visible {
+  opacity: 1;
+}
+
 /* Add pointer cursor to clickable media */
 .clickable-media {
   cursor: pointer;
@@ -1626,6 +1840,26 @@ video.cart-item-image {
     width: 40px;
     height: 40px;
     font-size: 1.5rem;
+  }
+
+  .lightbox-nav {
+    width: 50px;
+    height: 50px;
+    font-size: 2.5rem;
+  }
+
+  .lightbox-prev {
+    left: 10px;
+  }
+
+  .lightbox-next {
+    right: 10px;
+  }
+
+  .lightbox-counter {
+    bottom: 10px;
+    font-size: 0.9rem;
+    padding: 8px 16px;
   }
 
   .lightbox-content {
