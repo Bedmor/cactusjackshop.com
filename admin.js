@@ -1,5 +1,5 @@
-// Admin password - Change this to your desired password
-const ADMIN_PASSWORD = "RmcuU2FrYXJ5YS43Mg==";
+// Admin password - SHA-256 hash of "Fg.Sakarya.72"
+const ADMIN_PASSWORD = "52ad5d996e8ee34811206346277ef2fedd7236d6f5009256ab337f57c5f39a20";
 // Current editing product ID
 let editingProductId = null;
 let editingCommentId = null;
@@ -34,8 +34,6 @@ async function login(event) {
 
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-    console.log(typeof (hashedPassword) + " : " + hashedPassword);
 
     // Now check the password
     if (hashedPassword === ADMIN_PASSWORD) {
