@@ -689,7 +689,7 @@ body {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: linear-gradient(135deg, var(--bg-light), var(--primary));
+  background: var(--primary);
   border: none;
   width: 54px;
   height: 54px;
