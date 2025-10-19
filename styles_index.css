@@ -306,6 +306,7 @@ body {
 
 /* Responsive Design for About Story */
 @media (max-width: 768px) {
+
   .about-story {
     padding: 60px 15px;
   }
@@ -1340,6 +1341,9 @@ video.cart-item-image {
 }
 
 @media (max-width: 768px) {
+  .about{
+    max-width: 92vw;
+  }
   .burger-menu {
     display: flex; /* Show burger menu on mobile */
   }
