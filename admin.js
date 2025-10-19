@@ -636,15 +636,11 @@ async function saveHeroSettings(event) {
     // Upload to storage
     const { url, isVideo } = await uploadHeroBackground(file);
 
-    // Save to localStorage
-    localStorage.setItem('heroBackgroundUrl', url);
-    localStorage.setItem('heroBackgroundType', isVideo ? 'video' : 'image');
-
     submitBtn.textContent = '✓ Kaydedildi!';
     submitBtn.style.background = '#4CAF50';
 
     // Update status display
-    updateHeroBackgroundStatus();
+    await updateHeroBackgroundStatus();
 
     setTimeout(() => {
       submitBtn.textContent = originalText;
@@ -716,22 +712,73 @@ async function uploadHeroBackground(file) {
 
 async function removeHeroBackground() {
   if (confirm('Hero arkaplanını kaldırmak istediğinize emin misiniz? Gradyan arkaplan kullanılacak.')) {
-    localStorage.removeItem('heroBackgroundUrl');
-    localStorage.removeItem('heroBackgroundType');
-    updateHeroBackgroundStatus();
-    alert('Hero arkaplanı kaldırıldı! Ana sayfayı yenileyerek görüntüleyebilirsiniz.');
+    try {
+      const bucketName = 'product-images';
+
+      // List all files to find hero background
+      const { data: files, error: listError } = await supabase.storage
+        .from(bucketName)
+        .list('', {
+          limit: 100,
+          sortBy: { column: 'created_at', order: 'desc' }
+        });
+
+      if (listError) throw listError;
+
+      // Find and delete hero background file
+      const heroFile = files?.find(file => file.name.startsWith('hero-background'));
+
+      if (heroFile) {
+        const { error: deleteError } = await supabase.storage
+          .from(bucketName)
+          .remove([heroFile.name]);
+
+        if (deleteError) throw deleteError;
+      }
+
+      await updateHeroBackgroundStatus();
+      alert('Hero arkaplanı kaldırıldı! Ana sayfayı yenileyerek görüntüleyebilirsiniz.');
+    } catch (error) {
+      console.error('Error removing hero background:', error);
+      alert('Hero arkaplanı kaldırılırken bir hata oluştu: ' + error.message);
+    }
   }
 }
 
-function updateHeroBackgroundStatus() {
-  const heroBackgroundUrl = localStorage.getItem('heroBackgroundUrl');
-  const heroBackgroundType = localStorage.getItem('heroBackgroundType');
-  const statusElement = document.getElementById('heroBackgroundStatus');
+async function updateHeroBackgroundStatus() {
+  try {
+    const bucketName = 'product-images';
 
-  if (heroBackgroundUrl) {
-    const mediaType = heroBackgroundType === 'video' ? '📹 Video' : '🖼️ Resim';
-    statusElement.innerHTML = `${mediaType} <a href="${heroBackgroundUrl}" target="_blank" style="color: var(--primary);">Görüntüle</a>`;
-  } else {
+    // List all files to find hero background
+    const { data: files, error: listError } = await supabase.storage
+      .from(bucketName)
+      .list('', {
+        limit: 100,
+        sortBy: { column: 'created_at', order: 'desc' }
+      });
+
+    if (listError) throw listError;
+
+    const statusElement = document.getElementById('heroBackgroundStatus');
+
+    // Find hero background file
+    const heroFile = files?.find(file => file.name.startsWith('hero-background'));
+
+    if (heroFile) {
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(heroFile.name);
+
+      const isVideo = /\.(mp4|webm|mov|ogg)$/i.test(heroFile.name);
+      const mediaType = isVideo ? '📹 Video' : '🖼️ Resim';
+      statusElement.innerHTML = `${mediaType} <a href="${urlData.publicUrl}" target="_blank" style="color: var(--primary);">Görüntüle</a>`;
+    } else {
+      statusElement.textContent = 'Gradyan (Varsayılan)';
+    }
+  } catch (error) {
+    console.error('Error fetching hero background status:', error);
+    const statusElement = document.getElementById('heroBackgroundStatus');
     statusElement.textContent = 'Gradyan (Varsayılan)';
   }
 }
