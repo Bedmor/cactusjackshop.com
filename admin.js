@@ -217,7 +217,7 @@ async function loadProducts() {
       const isVideo = product.image && product.image.match(/\.(mp4|webm|mov|ogg)(\?|$)/i);
 
       const mediaHtml = isVideo
-        ? `<video src="${product.image}" class="product-image-small" muted playsinline loop style="cursor: pointer;" onerror="this.style.display='none'"></video>`
+        ? `<video src="${product.image}" class="product-image-small" muted controls playsinline loop style="cursor: pointer;" onerror="this.style.display='none'"></video>`
         : `<img src="${product.image}" alt="${product.name}" class="product-image-small" onerror="this.src='assets/100mg.png'">`;
 
       return `
@@ -310,7 +310,7 @@ function renderMediaGallery() {
       cursor: grab;
     " draggable="true" ondragstart="dragStartMedia(event, ${index})" ondragover="dragOverMedia(event)" ondrop="dropMedia(event, ${index})">
       ${media.type === 'video'
-      ? `<video src="${media.url}" style="width: 100%; height: 100%; object-fit: cover;" muted></video>`
+      ? `<video src="${media.url}" style="width: 100%; height: 100%; object-fit: cover;" muted controls></video>`
       : `<img src="${media.url}" style="width: 100%; height: 100%; object-fit: cover;" />`
     }
       ${media.isPrimary ? '<div style="position: absolute; top: 5px; left: 5px; background: var(--primary); color: var(--dark-brown); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">ANA</div>' : ''}

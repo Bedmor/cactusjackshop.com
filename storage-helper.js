@@ -18,7 +18,7 @@ const storageHelper = {
             }
 
             // Validate file size (5MB max)
-            const maxSize = 5 * 1024 * 1024; // 5MB
+            const maxSize = 50 * 1024 * 1024; // 5MB
             if (file.size > maxSize) {
                 throw new Error('Image must be smaller than 5MB');
             }
