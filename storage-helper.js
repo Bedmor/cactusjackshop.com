@@ -145,7 +145,7 @@ const storageHelper = {
      * @param {number} quality - JPEG quality (0-1)
      * @returns {Promise<Blob>} - Compressed image blob
      */
-    async compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.8) {
+    async compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
