@@ -45,6 +45,84 @@ async function loadCustomFont() {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
+    // Load custom hero background from Supabase Storage
+    try {
+        const bucketName = "product-images";
+
+        // List all files in the bucket
+        const { data: files, error: listError } = await supabase.storage
+            .from(bucketName)
+            .list("", {
+                limit: 100,
+                sortBy: { column: "created_at", order: "desc" },
+            });
+
+        if (listError) {
+            console.log("Error listing files:", listError);
+            return;
+        }
+
+        // Find the hero background file (starts with 'hero-background')
+        const heroFile = files?.find((file) =>
+            file.name.startsWith("hero-background")
+        );
+
+        if (!heroFile) {
+            console.log("No hero background file found");
+            return;
+        }
+
+        // Get the public URL
+        const { data: urlData } = supabase.storage
+            .from(bucketName)
+            .getPublicUrl(heroFile.name);
+
+        if (!urlData?.publicUrl) {
+            return;
+        }
+
+        const heroBackgroundUrl = urlData.publicUrl;
+
+        // Determine if it's a video based on file extension
+        const isVideo = /\.(mp4|webm|mov|ogg)$/i.test(heroFile.name);
+        const heroSection = document.querySelector(".hero-section");
+
+        if (heroSection) {
+            if (isVideo) {
+                // Create video background
+                const video = document.createElement("video");
+                video.src = heroBackgroundUrl;
+                video.autoplay = true;
+                video.muted = true;
+                video.loop = true;
+                video.playsInline = true;
+                video.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                z-index: 0;
+              `;
+                heroSection.insertBefore(video, heroSection.firstChild);
+            } else {
+                // Set image background
+                heroSection.style.backgroundImage = `url('${heroBackgroundUrl}')`;
+                heroSection.style.backgroundSize = "cover";
+                heroSection.style.backgroundPosition = "center";
+                heroSection.style.backgroundRepeat = "no-repeat";
+            }
+
+            // Darken overlay for better text visibility
+            const overlay = heroSection.querySelector(".hero-overlay");
+            if (overlay) {
+                overlay.style.background = "rgba(0, 0, 0, 0.4)";
+            }
+        }
+    } catch (err) {
+        console.error("Error loading hero background:", err);
+    }
     await loadCustomFont();
     await loadProducts();
     await loadProductShowcase();
