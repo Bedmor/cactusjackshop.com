@@ -451,22 +451,52 @@ async function deleteProduct(productId) {
   }
 
   try {
-    // Get product to delete its image
+    // Get product to delete its media
     const product = await db.getProduct(productId);
+
+    if (product && typeof storageHelper !== 'undefined') {
+      // Delete all media files from storage
+      const mediaToDelete = [];
+
+      // Add media from media gallery array
+      if (product.media && Array.isArray(product.media)) {
+        product.media.forEach(mediaItem => {
+          if (mediaItem.url) {
+            mediaToDelete.push(mediaItem.url);
+          }
+        });
+      }
+
+      // Add old single image field (for backward compatibility)
+      if (product.image && !mediaToDelete.includes(product.image)) {
+        mediaToDelete.push(product.image);
+      }
+
+      // Delete all unique media URLs
+      const uniqueMediaUrls = [...new Set(mediaToDelete)];
+      console.log(`Deleting ${uniqueMediaUrls.length} media file(s) for product ${productId}`);
+
+      for (const url of uniqueMediaUrls) {
+        try {
+          await storageHelper.deleteImage(url);
+          console.log(`Deleted media: ${url}`);
+        } catch (deleteError) {
+          console.error(`Failed to delete media ${url}:`, deleteError);
+          // Continue deleting other files even if one fails
+        }
+      }
+    }
 
     // Delete product from database
     await db.deleteProduct(productId);
 
-    // Delete image from storage if it's a Supabase image
-    if (product && product.image && typeof storageHelper !== 'undefined') {
-      await storageHelper.deleteImage(product.image);
-    }
-
     await loadProducts();
     await loadStats();
+
+    alert('✅ Ürün ve tüm medya dosyaları başarıyla silindi.');
   } catch (error) {
     console.error('Error deleting product:', error);
-    alert('❌ Ürün silinirken hata oluştu.');
+    alert('❌ Ürün silinirken hata oluştu: ' + error.message);
   }
 }
 
@@ -676,6 +706,39 @@ async function uploadHeroBackground(file) {
 
   // Check if bucket exists, if not use product-images bucket
   const bucketName = 'product-images'; // Using existing bucket
+
+  try {
+    // First, delete all existing hero backgrounds
+    const { data: existingFiles, error: listError } = await supabase.storage
+      .from(bucketName)
+      .list('', {
+        limit: 100,
+        sortBy: { column: 'created_at', order: 'desc' }
+      });
+
+    if (listError) {
+      console.error('Error listing files:', listError);
+    } else if (existingFiles && existingFiles.length > 0) {
+      // Find all hero background files
+      const heroFiles = existingFiles.filter(file => file.name.startsWith('hero-background'));
+
+      if (heroFiles.length > 0) {
+        const fileNames = heroFiles.map(f => f.name);
+        const { error: deleteError } = await supabase.storage
+          .from(bucketName)
+          .remove(fileNames);
+
+        if (deleteError) {
+          console.error('Error deleting old hero backgrounds:', deleteError);
+        } else {
+          console.log(`Deleted ${fileNames.length} old hero background(s)`);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error cleaning up old hero backgrounds:', error);
+    // Continue with upload even if deletion fails
+  }
 
   if (!isVideo) {
     // Compress image before upload
