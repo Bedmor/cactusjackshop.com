@@ -174,7 +174,7 @@ async function loadStats() {
   try {
     const products = await db.getProducts();
     const statsGrid = document.getElementById('statsGrid');
-
+    const storageStats = await storageHelper.getStorageStats();
     const totalProducts = products.length;
     const outOfStockProducts = products.filter(p => p.stock === 0).length;
 
@@ -186,6 +186,10 @@ async function loadStats() {
       <div class="stat-card">
         <div class="stat-value">${outOfStockProducts}</div>
         <div class="stat-label">Stokta Yok</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${storageStats.totalSizeMB}</div>
+        <div class="stat-label">Toplam Depolama Alanı (MB)</div>
       </div>
     `;
   } catch (error) {
