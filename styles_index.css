@@ -1007,12 +1007,44 @@ video.showcase-item-image {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 2px solid transparent;
+  position: relative;
 }
 
 .product-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
   border-color: var(--primary);
+}
+
+/* Free Shipping Badge */
+.free-shipping-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.6);
+  }
 }
 
 .product-image {
