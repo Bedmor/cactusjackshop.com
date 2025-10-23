@@ -97,6 +97,7 @@ body {
 
 .hero-buttons {
   display: flex;
+  align-items: center;
   gap: 20px;
   justify-content: center;
   flex-wrap: wrap;
@@ -105,7 +106,7 @@ body {
 
 .hero-btn {
   justify-content: center;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 10px;
   padding: 16px 35px;
@@ -130,17 +131,6 @@ body {
 .hero-btn.primary:hover {
   background: var(--secondary);
   color: var(--text-dark);
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
-}
-
-.hero-btn.secondary {
-  background: var(--secondary);
-  color: var(--text-dark);
-}
-
-.hero-btn.secondary:hover {
-  background: var(--primary);
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
 }
