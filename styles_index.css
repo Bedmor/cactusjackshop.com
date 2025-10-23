@@ -601,12 +601,16 @@ video.showcase-item-image {
   position: relative;
   overflow: hidden;
   padding: 20px 60px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .cmt-list {
   display: flex;
   transition: transform 0.5s ease-in-out;
   gap: 20px;
+  align-items: stretch;
 }
 
 .cmt-card {
@@ -988,6 +992,8 @@ video.showcase-item-image {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 30px;
   margin-bottom: 50px;
+  justify-items: center;
+  align-items: start;
 }
 
 .product-card {
@@ -998,6 +1004,8 @@ video.showcase-item-image {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 2px solid transparent;
   position: relative;
+  width: 100%;
+  max-width: 320px;
 }
 
 .product-card:hover {
@@ -1120,12 +1128,16 @@ video.product-image:hover {
   border-radius: 8px;
   margin-bottom: 15px;
   background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .media-carousel-track {
   display: flex;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
+  align-items: center;
 }
 
 .product-media-item {
@@ -1784,7 +1796,8 @@ video.cart-item-image {
   }
 
   .cmt-card {
-    min-width: 80%;
+    width: 25%;
+    min-width: 0px;
   }
 
   .carousel-container {
