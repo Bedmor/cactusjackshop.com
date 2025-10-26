@@ -45,6 +45,7 @@ async function loadCustomFont() {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
+    setTimeout(animateBand, 1000);
     // Load custom hero background from Supabase Storage
     try {
         const bucketName = "product-images";
@@ -169,14 +170,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     const carouselContainer = document.querySelector('.carousel-container');
 
     if (carouselContainer) {
-        // Touch events
+        // Touch events for carousel
+        let carouselTouchStartX = 0;
+        let carouselTouchEndX = 0;
+
         carouselContainer.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
+            carouselTouchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
 
         carouselContainer.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
+            carouselTouchEndX = e.changedTouches[0].screenX;
+            const diff = carouselTouchStartX - carouselTouchEndX;
+            const swipeThreshold = 50;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    carouselNext();
+                } else {
+                    carouselPrev();
+                }
+            }
         }, { passive: true });
 
         // Mouse events for desktop drag
@@ -402,6 +415,97 @@ window.addEventListener('resize', () => {
     createIndicators();
 });
 
+function animateBand() {
+    const shopBand = document.querySelector('.shop-band');
+    const shopBandContent = document.querySelector('.shop-band-content');
+    const items = shopBandContent.querySelectorAll('p');
+
+    if (!items || items.length === 0) return;
+
+    // Make sure the container is scrollable
+    shopBand.style.overflowX = 'auto';
+    shopBand.style.scrollbarWidth = 'none'; // Hide scrollbar for Firefox
+    shopBand.style.msOverflowStyle = 'none'; // Hide scrollbar for IE/Edge
+    // Hide scrollbar for Chrome/Safari
+    const style = document.createElement('style');
+    style.textContent = '.shop-band::-webkit-scrollbar { display: none; }';
+    document.head.appendChild(style);
+
+    let currentIndex = 0;
+
+    // Function to calculate dynamic scroll duration based on text length and device
+    function getScrollDuration(text) {
+        const baseTime = 3000; // Base time in milliseconds
+        const isMobile = window.innerWidth <= 768;
+
+        // Calculate extra time based on text length
+        // Longer texts need more time to be read
+        const textLength = text.length;
+        const extraTime = Math.floor(textLength / 10) * 100; // 100ms per 10 characters
+
+        // Mobile devices might need slightly more time
+        const platformMultiplier = isMobile ? 1.2 : 1;
+
+        return Math.min((baseTime + extraTime) * platformMultiplier, 8000); // Cap at 8 seconds
+    }
+
+    // Function to scroll to a specific item
+    function scrollToItem(index) {
+        if (index >= items.length) {
+            index = 0; // Loop back to start
+        }
+
+        const item = items[index];
+        if (!item) return;
+
+        // Calculate scroll position to center the item horizontally
+        const containerWidth = shopBand.offsetWidth;
+        const itemLeft = item.offsetLeft;
+        const itemWidth = item.offsetWidth;
+
+        // Calculate the scroll position to center the item
+        const scrollPosition = itemLeft - (containerWidth / 2) + (itemWidth / 2);
+
+        // Scroll the shop-band container
+        shopBand.scrollTo({
+            left: Math.max(0, scrollPosition),
+            behavior: 'smooth'
+        });
+
+        // Calculate dynamic duration based on current item's text
+        const duration = getScrollDuration(item.textContent);
+
+        // Schedule next item
+        setTimeout(() => {
+            currentIndex = (currentIndex + 1) % items.length;
+            scrollToItem(currentIndex);
+        }, duration);
+    }
+
+    // Start the animation
+    scrollToItem(0);
+
+    // Pause animation on hover/touch (better UX)
+    let isPaused = false;
+    let pauseTimeout;
+
+    shopBand.addEventListener('mouseenter', () => {
+        isPaused = true;
+    });
+
+    shopBand.addEventListener('mouseleave', () => {
+        isPaused = false;
+    });
+
+    // Touch support for mobile
+    shopBand.addEventListener('touchstart', () => {
+        isPaused = true;
+        clearTimeout(pauseTimeout);
+        pauseTimeout = setTimeout(() => {
+            isPaused = false;
+        }, 3000); // Resume after 3 seconds of no touch
+    }, { passive: true });
+}
 
 // Load products from Supabase
 async function loadProducts() {
@@ -839,25 +943,6 @@ function checkout() {
             document.getElementById('cartSidebar').classList.remove('active');
         }
     }, delay);
-}
-
-// Touch/Swipe support for carousel
-let touchStartX = 0;
-let touchEndX = 0;
-
-function handleSwipe() {
-    const swipeThreshold = 50; // Minimum distance for swipe
-    const diff = touchStartX - touchEndX;
-
-    if (Math.abs(diff) > swipeThreshold) {
-        if (diff > 0) {
-            // Swiped left - go to next
-            carouselNext();
-        } else {
-            // Swiped right - go to previous
-            carouselPrev();
-        }
-    }
 }
 
 // Products Carousel for Mobile
