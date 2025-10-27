@@ -507,13 +507,28 @@ function animateBand() {
     }, { passive: true });
 }
 
+// Create skeleton loader for products
+function createProductSkeleton(count = 6) {
+    return Array(count).fill(0).map(() => `
+        <div class="product-card skeleton">
+            <div class="skeleton-image"></div>
+            <div class="skeleton-content">
+                <div class="skeleton-title"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+                <div class="skeleton-button"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
 // Load products from Supabase
 async function loadProducts() {
     const productsGrid = document.getElementById('productsGrid');
 
     try {
-        // Show loading state
-        productsGrid.innerHTML = '<p style="text-align: center; color: #666; grid-column: 1/-1;">Ürünler yükleniyor...</p>';
+        // Show skeleton loading state
+        productsGrid.innerHTML = createProductSkeleton(6);
 
         // Fetch products from Supabase
         products = await db.getProducts();
@@ -740,12 +755,12 @@ async function loadProductShowcase() {
 function scrollToProduct(productId) {
     const productsSection = document.querySelector('.shop-container');
     if (productsSection) {
-        productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
+        productsSection.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
         // Highlight the product card briefly
         setTimeout(() => {
             const productCards = document.querySelectorAll('.product-card');
             const productIndex = products.findIndex(p => p.id === productId);
+            goToProductSlide(productIndex);
             if (productIndex !== -1 && productCards[productIndex]) {
                 productCards[productIndex].style.transition = 'all 0.3s ease';
                 productCards[productIndex].style.transform = 'scale(1.05)';
