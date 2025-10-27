@@ -268,8 +268,8 @@ function subscribeToProducts() {
 async function loadComments() {
     const commentsList = document.getElementById('cmt-list');
     try {
-        // Show loading state
-        commentsList.innerHTML = '<p style="text-align: center; color: #666;">Yorumlar yükleniyor...</p>';
+        // Show skeleton loading state
+        commentsList.innerHTML = createCommentSkeleton(3);
         // Fetch comments from Supabase
         const comments = await db.getComments();
         if (comments.length === 0) {
@@ -522,6 +522,34 @@ function createProductSkeleton(count = 6) {
     `).join('');
 }
 
+// Create skeleton loader for comments
+function createCommentSkeleton(count = 3) {
+    return Array(count).fill(0).map(() => `
+        <div class="cmt-card skeleton">
+            <div class="cmt-header skeleton">
+                <div class="skeleton-text" style="width: 150px; height: 20px;"></div>
+                <div class="skeleton-text" style="width: 100px; height: 20px;"></div>
+            </div>
+            <div class="skeleton-text" style="width: 100%; height: 16px; margin: 10px 0;"></div>
+            <div class="skeleton-text" style="width: 80%; height: 16px; margin: 10px 0;"></div>
+            <div class="skeleton-text" style="width: 60%; height: 16px; margin: 10px 0;"></div>
+            <div class="skeleton-text" style="width: 100px; height: 14px; margin-top: 10px;"></div>
+        </div>
+    `).join('');
+}
+
+// Create skeleton loader for product showcase
+function createShowcaseSkeleton(count = 10) {
+    return Array(count).fill(0).map(() => `
+        <div class="showcase-item skeleton">
+            <div class="skeleton-image" style="width: 300px; height: 300px; border-radius: 12px;"></div>
+            <div class="showcase-item-info">
+                <div class="skeleton-text" style="width: 150px; height: 20px;"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
 // Load products from Supabase
 async function loadProducts() {
     const productsGrid = document.getElementById('productsGrid');
@@ -705,6 +733,9 @@ async function loadProductShowcase() {
     if (!showcaseTrack) return;
 
     try {
+        // Show skeleton loading state
+        showcaseTrack.innerHTML = createShowcaseSkeleton(10);
+
         // Use already loaded products, or fetch if not available
         const showcaseProducts = products.length > 0 ? products : await db.getProducts();
 
@@ -755,7 +786,7 @@ async function loadProductShowcase() {
 function scrollToProduct(productId) {
     const productsSection = document.querySelector('.shop-container');
     if (productsSection) {
-        productsSection.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+        productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         // Highlight the product card briefly
         setTimeout(() => {
             const productCards = document.querySelectorAll('.product-card');

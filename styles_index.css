@@ -1371,6 +1371,49 @@ video.product-image:hover {
   }
 }
 
+/* Comment Skeleton Styles */
+.cmt-card.skeleton {
+  pointer-events: none;
+  background: var(--cream);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.cmt-card.skeleton .cmt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.cmt-card.skeleton .skeleton-text {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* Showcase Skeleton Styles */
+.showcase-item.skeleton {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.showcase-item.skeleton .skeleton-image {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+.showcase-item.skeleton .skeleton-text {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+  margin: 10px auto 0;
+}
+
 .cart-sidebar {
   position: fixed;
   right: -400px;
