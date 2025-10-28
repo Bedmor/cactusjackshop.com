@@ -61,6 +61,7 @@ async function showAdminPanel() {
   document.getElementById('adminPanel').style.display = 'block';
   await loadProducts();
   await loadComments();
+  await loadOrders();
   await loadStats();
   updateHeroBackgroundStatus();
   updateFontStatus();
@@ -169,12 +170,192 @@ async function saveComment(event) {
     alert('Yorum kaydedilirken hata oluştu.');
   }
 }
+
+// Load orders from database
+async function loadOrders() {
+  const tableBody = document.getElementById('ordersTableBody');
+  try {
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    if (!orders || orders.length === 0) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 40px; color: #666;">
+            Henüz sipariş bulunmamaktadır.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tableBody.innerHTML = orders.map(order => {
+      const date = new Date(order.created_at).toLocaleDateString('tr-TR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const itemsList = order.items.map(item =>
+        `${item.product_name} (${item.quantity}x)`
+      ).join(', ');
+
+      const statusColors = {
+        'pending': '#ff9800',
+        'completed': '#4caf50',
+        'cancelled': '#f44336'
+      };
+
+      const statusLabels = {
+        'pending': 'Beklemede',
+        'completed': 'Tamamlandı',
+        'cancelled': 'İptal Edildi'
+      };
+
+      return `
+        <tr>
+          <td>#${order.id}</td>
+          <td>${date}</td>
+          <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${itemsList}">
+            ${itemsList}
+          </td>
+          <td><strong>${order.total_amount.toFixed(2)} ₺</strong></td>
+          <td>
+            <span style="background: ${statusColors[order.status]}; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.9rem;">
+              ${statusLabels[order.status]}
+            </span>
+          </td>
+          <td>
+            <button class="icon-btn" onclick="viewOrderDetails(${order.id})" title="Detayları Gör">
+              👁️
+            </button>
+            <select onchange="updateOrderStatus(${order.id}, this.value)" style="margin-left: 10px;">
+              <option value="">Durum Değiştir</option>
+              <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Beklemede</option>
+              <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Tamamlandı</option>
+              <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>İptal Edildi</option>
+            </select>
+            <button class="icon-btn delete" onclick="deleteOrder(${order.id})" title="Sil">
+              🗑️
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (error) {
+    console.error('Error loading orders:', error);
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 40px; color: #d32f2f;">
+          ❌ Siparişler yüklenirken hata oluştu.
+        </td>
+      </tr>
+    `;
+  }
+}
+
+// View order details
+async function viewOrderDetails(orderId) {
+  try {
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single();
+
+    if (error) throw error;
+
+    const date = new Date(order.created_at).toLocaleDateString('tr-TR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const itemsHtml = order.items.map(item => `
+      <div style="border-bottom: 1px solid #eee; padding: 10px 0;">
+        <strong>${item.product_name}</strong><br>
+        Adet: ${item.quantity}<br>
+        Fiyat: ${item.price.toFixed(2)} ₺<br>
+        Ara Toplam: ${item.subtotal.toFixed(2)} ₺
+      </div>
+    `).join('');
+
+    const statusLabels = {
+      'pending': 'Beklemede',
+      'completed': 'Tamamlandı',
+      'cancelled': 'İptal Edildi'
+    };
+
+    alert(`Sipariş Detayları\n\nSipariş No: #${order.id}\nTarih: ${date}\nDurum: ${statusLabels[order.status]}\n\nÜrünler:\n${order.items.map(item => `- ${item.product_name} (${item.quantity}x) = ${item.subtotal.toFixed(2)} ₺`).join('\n')}\n\nToplam: ${order.total_amount.toFixed(2)} ₺`);
+  } catch (error) {
+    console.error('Error loading order details:', error);
+    alert('Sipariş detayları yüklenirken hata oluştu.');
+  }
+}
+
+// Update order status
+async function updateOrderStatus(orderId, newStatus) {
+  if (!newStatus) return;
+
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('id', orderId);
+
+    if (error) throw error;
+
+    alert('Sipariş durumu güncellendi!');
+    loadOrders();
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    alert('Sipariş durumu güncellenirken hata oluştu.');
+  }
+}
+
+// Delete order
+async function deleteOrder(orderId) {
+  if (!confirm('Bu siparişi silmek istediğinizden emin misiniz?')) return;
+
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .delete()
+      .eq('id', orderId);
+
+    if (error) throw error;
+
+    alert('Sipariş silindi!');
+    loadOrders();
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    alert('Sipariş silinirken hata oluştu.');
+  }
+}
+
 // Load statistics
 async function loadStats() {
   try {
     const products = await db.getProducts();
     const statsGrid = document.getElementById('statsGrid');
     const storageStats = await storageHelper.getStorageStats();
+
+    // Get orders count
+    const { data: orders, error: ordersError } = await supabase
+      .from('orders')
+      .select('*');
+
+    const totalOrders = orders ? orders.length : 0;
+    const pendingOrders = orders ? orders.filter(o => o.status === 'pending').length : 0;
+
     const totalProducts = products.length;
     const outOfStockProducts = products.filter(p => p.stock === 0).length;
 
@@ -186,6 +367,14 @@ async function loadStats() {
       <div class="stat-card">
         <div class="stat-value">${outOfStockProducts}</div>
         <div class="stat-label">Stokta Yok</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${totalOrders}</div>
+        <div class="stat-label">Toplam Sipariş</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${pendingOrders}</div>
+        <div class="stat-label">Bekleyen Sipariş</div>
       </div>
       <div class="stat-card">
         <div class="stat-value">${storageStats.totalSizeMB}</div>

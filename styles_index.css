@@ -1539,7 +1539,8 @@ video.cart-item-image {
   font-weight: bold;
   color: var(--dark-brown);
   margin-bottom: 15px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   justify-content: space-between;
 }
 

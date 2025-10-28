@@ -930,65 +930,106 @@ function saveCart() {
 
 // Checkout function - Redirects to WhatsApp
 function checkout() {
-    if (cart.length === 0) {
-        alert('Sepetiniz boş!');
-        return;
-    }
-
-    // Get WhatsApp number from config (falls back to default if not set)
-    const whatsappNumber = typeof WHATSAPP_CONFIG !== 'undefined'
-        ? WHATSAPP_CONFIG.number
-        : '905551234567'; // Fallback number
-
-    // Build order message
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-    // Create detailed message for WhatsApp
-    let message = '*Sipariş Detayları*\n';
-
-    cart.forEach((item, index) => {
-        message += `${index + 1}. ${item.name}\n`;
-        message += `   Adet: ${item.quantity}\n`;
-        message += `   Fiyat: ${item.price.toFixed(2)} ₺\n`;
-        message += `   Ara Toplam: ${(item.price * item.quantity).toFixed(2)} ₺\n\n`;
-    });
-
-    message += `*Toplam: ${total.toFixed(2)} ₺*\n`;
-    message += `Merhaba! Yukarıdaki ürünleri sipariş vermek istiyorum.`;
-
-    // Add custom suffix if configured
-    if (typeof WHATSAPP_CONFIG !== 'undefined' && WHATSAPP_CONFIG.messageSuffix) {
-        message += WHATSAPP_CONFIG.messageSuffix;
-    }
-
-    // Encode message for URL
-    const encodedMessage = encodeURIComponent(message);
-
-    // Create WhatsApp URL
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-
-    // Open WhatsApp in new tab
-    window.open(whatsappUrl, '_blank');
-
-    // Get confirmation delay from config or use default
-    const delay = typeof WHATSAPP_CONFIG !== 'undefined'
-        ? WHATSAPP_CONFIG.confirmDelay
-        : 1000;
-
-    // Show confirmation message
-    setTimeout(() => {
-        const shouldClear = typeof WHATSAPP_CONFIG !== 'undefined'
-            ? WHATSAPP_CONFIG.clearCartAfterRedirect
-            : true;
-
-        if (shouldClear && confirm('WhatsApp\'a yönlendirildiniz!\n\nSepetinizi temizlemek ister misiniz?')) {
-            // Clear cart
-            cart = [];
-            saveCart();
-            updateCartUI();
-            document.getElementById('cartSidebar').classList.remove('active');
+    if (confirm('Siparişinizi WhatsApp üzerinden tamamlamak istediğinize emin misiniz?')) {
+        if (cart.length === 0) {
+            alert('Sepetiniz boş!');
+            return;
         }
-    }, delay);
+
+        // Get WhatsApp number from config (falls back to default if not set)
+        const whatsappNumber = typeof WHATSAPP_CONFIG !== 'undefined'
+            ? WHATSAPP_CONFIG.number
+            : '905551234567'; // Fallback number
+
+        // Build order message
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        // Create detailed message for WhatsApp
+        let message = '*Sipariş Detayları*\n';
+
+        cart.forEach((item, index) => {
+            message += `${index + 1}. ${item.name}\n`;
+            message += `   Adet: ${item.quantity}\n`;
+            message += `   Fiyat: ${item.price.toFixed(2)} ₺\n`;
+            message += `   Ara Toplam: ${(item.price * item.quantity).toFixed(2)} ₺\n\n`;
+        });
+
+        message += `*Toplam: ${total.toFixed(2)} ₺*\n`;
+        message += `Merhaba! Yukarıdaki ürünleri sipariş vermek istiyorum.`;
+
+        // Add custom suffix if configured
+        if (typeof WHATSAPP_CONFIG !== 'undefined' && WHATSAPP_CONFIG.messageSuffix) {
+            message += WHATSAPP_CONFIG.messageSuffix;
+        }
+
+        // Save order to database
+        saveOrderToDatabase(cart, total).catch(err => {
+            console.error('Error saving order:', err);
+        });
+
+        // Encode message for URL
+        const encodedMessage = encodeURIComponent(message);
+
+        // Create WhatsApp URL
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+        // Open WhatsApp in new tab
+        window.open(whatsappUrl, '_blank');
+
+        // Get confirmation delay from config or use default
+        const delay = typeof WHATSAPP_CONFIG !== 'undefined'
+            ? WHATSAPP_CONFIG.confirmDelay
+            : 1000;
+
+        // Show confirmation message
+        setTimeout(() => {
+            const shouldClear = typeof WHATSAPP_CONFIG !== 'undefined'
+                ? WHATSAPP_CONFIG.clearCartAfterRedirect
+                : true;
+
+            if (shouldClear && confirm('WhatsApp\'a yönlendirildiniz!\n\nSepetinizi temizlemek ister misiniz?')) {
+                // Clear cart
+                cart = [];
+                saveCart();
+                updateCartUI();
+                document.getElementById('cartSidebar').classList.remove('active');
+            }
+        }, delay);
+    }
+}
+
+// Save order to database
+async function saveOrderToDatabase(cartItems, total) {
+    try {
+        const orderData = {
+            items: cartItems.map(item => ({
+                product_id: item.id,
+                product_name: item.name,
+                quantity: item.quantity,
+                price: item.price,
+                subtotal: item.price * item.quantity
+            })),
+            total_amount: total,
+            status: 'pending',
+            created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+            .from('orders')
+            .insert([orderData])
+            .select();
+
+        if (error) {
+            console.error('Error saving order:', error);
+            throw error;
+        }
+
+        console.log('Order saved successfully:', data);
+        return data;
+    } catch (error) {
+        console.error('Failed to save order:', error);
+        throw error;
+    }
 }
 
 // Products Carousel for Mobile
