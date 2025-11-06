@@ -1,9 +1,9 @@
-// Supabase Configuration
-// IMPORTANT: Replace these with your actual Supabase credentials
-// Get them from: https://app.supabase.com/project/_/settings/api
+// Supabase Configuration Template
+// This file is used by GitHub Actions to generate the actual config
+// DO NOT commit the actual supabase-config.js with real credentials
 
-const SUPABASE_URL = 'https://fnabrksrfrwgsvcdetci.supabase.co'; // e.g., 'https://xxxxx.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZuYWJya3NyZnJ3Z3N2Y2RldGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NTA3OTcsImV4cCI6MjA3NjAyNjc5N30.se-kvr6cfU33vM-4QXd4mVhiiCa3jCTtGZ5FknQpXJ8'; // Your anon/public key
+const SUPABASE_URL = '${SUPABASE_URL}';
+const SUPABASE_ANON_KEY = '${SUPABASE_ANON_KEY}';
 
 // Initialize Supabase client
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -82,6 +82,7 @@ const db = {
             console.error('Error deleting comment:', error);
             throw error;
         }
+        return true;
     },
 
     // Get all products
@@ -89,7 +90,7 @@ const db = {
         const { data, error } = await supabase
             .from('products')
             .select('*')
-            .order('id', { ascending: true });
+            .order('created_at', { ascending: false });
 
         if (error) {
             console.error('Error fetching products:', error);
@@ -108,7 +109,7 @@ const db = {
 
         if (error) {
             console.error('Error fetching product:', error);
-            return null;
+            throw error;
         }
         return data;
     },
@@ -156,5 +157,5 @@ const db = {
             throw error;
         }
         return true;
-    },
+    }
 };
