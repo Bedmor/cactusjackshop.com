@@ -1,5 +1,5 @@
-# Supabase config with real credentials (ignore locally, but allow GitHub Actions to commit)
-# supabase-config.js
+# Supabase config with real credentials
+supabase-config.js
 
 # Node modules (if any)
 node_modules/
