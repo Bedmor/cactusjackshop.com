@@ -238,13 +238,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     // Cart button event
-    document.getElementById('cartButton').addEventListener('click', () => {
-        document.getElementById('cartSidebar').classList.add('active');
+    const cartButtonElem = document.getElementById('cartButton');
+    const cartSidebarElem = document.getElementById('cartSidebar');
+    cartButtonElem.addEventListener('click', () => {
+        cartSidebarElem.classList.add('active');
+        cartButtonElem.setAttribute('aria-expanded', 'true');
     });
 
     // Close cart button
     document.getElementById('closeCart').addEventListener('click', () => {
-        document.getElementById('cartSidebar').classList.remove('active');
+        cartSidebarElem.classList.remove('active');
+        cartButtonElem.setAttribute('aria-expanded', 'false');
     });
 
     // Subscribe to real-time product updates
@@ -292,7 +296,7 @@ async function loadComments() {
         createIndicators();
     } catch (error) {
         console.error('Error loading comments:', error);
-        commentsList.innerHTML = '<p style="text-align: center; color: #d32f2f;">❌ Yorumlar yüklenirken hata oluştu.</p>';
+        commentsList.innerHTML = '<p style="text-align: center; color: var(--danger);">❌ Yorumlar yüklenirken hata oluştu.</p>';
     }
 }
 
@@ -643,7 +647,7 @@ async function loadProducts() {
         setTimeout(() => initMediaCarouselSwipe(), 100);
     } catch (error) {
         console.error('Error loading products:', error);
-        productsGrid.innerHTML = '<p style="text-align: center; color: #d32f2f; grid-column: 1/-1;">❌ Ürünler yüklenirken hata oluştu. Lütfen sayfayı yenileyin.</p>';
+        productsGrid.innerHTML = '<p style="text-align: center; color: var(--danger); grid-column: 1/-1;">❌ Ürünler yüklenirken hata oluştu. Lütfen sayfayı yenileyin.</p>';
     }
 }
 
@@ -778,7 +782,7 @@ async function loadProductShowcase() {
         showcaseTrack.innerHTML = showcaseHtml;
     } catch (error) {
         console.error('Error loading product showcase:', error);
-        showcaseTrack.innerHTML = '<p style="text-align: center; color: #d32f2f; padding: 40px;">❌ Vitrin yüklenirken hata oluştu.</p>';
+        showcaseTrack.innerHTML = '<p style="text-align: center; color: var(--danger); padding: 40px;">❌ Vitrin yüklenirken hata oluştu.</p>';
     }
 }
 
@@ -838,7 +842,7 @@ function addToCart(productId) {
     const button = event.target;
     const originalText = button.textContent;
     button.textContent = '✓ Eklendi';
-    button.style.background = '#4CAF50';
+    button.style.background = 'var(--success)';
 
     setTimeout(() => {
         button.textContent = originalText;
@@ -993,6 +997,7 @@ function checkout() {
                 saveCart();
                 updateCartUI();
                 document.getElementById('cartSidebar').classList.remove('active');
+                document.getElementById('cartButton')?.setAttribute('aria-expanded', 'false');
             }
         }, delay);
     }

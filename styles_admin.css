@@ -5,7 +5,7 @@
 }
 
 body {
-  font-family: "Oswald", sans-serif;
+  font-family: var(--font-sans);
   background-color: var(--bg-light);
   color: var(--text-dark);
 }
@@ -70,9 +70,13 @@ body {
   border-color: var(--primary);
 }
 
-.login-btn {
+.login-btn,
+.save-btn,
+.add-product-btn,
+.add-comment-btn,
+.logout-btn {
   width: 100%;
-  padding: 16px;
+  padding: 12px 16px;
   background: linear-gradient(90deg, var(--primary), var(--secondary));
   color: white;
   border: none;
@@ -80,19 +84,23 @@ body {
   font-size: 1.15rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--button-shadow);
   letter-spacing: 0.5px;
   transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
 }
 
-.login-btn:hover {
+.login-btn:hover,
+.save-btn:hover,
+.add-product-btn:hover,
+.add-comment-btn:hover,
+.logout-btn:hover {
   background: linear-gradient(90deg, var(--dark-brown), var(--primary));
   transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.13);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
 
 .error-message {
-  color: #d32f2f;
+  color: var(--danger);
   margin-top: 15px;
   display: none;
 }
@@ -118,11 +126,7 @@ body {
 }
 
 .admin-header {
-  background: linear-gradient(
-    90deg,
-    var(--secondary) 60%,
-    var(--primary) 100%
-  );
+  background: linear-gradient(90deg, var(--secondary) 60%, var(--primary) 100%);
   color: white;
   padding: 28px 24px;
   border-radius: 18px;
@@ -155,7 +159,7 @@ body {
 }
 
 .logout-btn:hover {
-  background-color: #d32f2f;
+  background-color: var(--danger);
   transform: scale(1.05);
 }
 
@@ -194,7 +198,7 @@ body {
 .add-product-btn,
 .add-comment-btn {
   padding: 10px 20px;
-  background: var(--green);
+  background: var(--accent);
   color: white;
   border: none;
   border-radius: 8px;
@@ -288,7 +292,7 @@ body {
 }
 
 .delete-btn {
-  background: #d32f2f;
+  background: var(--danger);
   color: white;
 }
 
@@ -328,6 +332,14 @@ body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   border: 1.5px solid rgba(255, 255, 255, 0.5);
   animation: modalPop 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+/* Focus visible state for admin controls */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 60%, white);
+  outline-offset: 3px;
 }
 @keyframes modalPop {
   0% {
@@ -395,17 +407,20 @@ body {
 
 .save-btn {
   width: 100%;
-  padding: 16px;
-  background-color: var(--green);
+  padding: 12px 16px;
+  background-color: var(--accent);
   color: white;
   border: none;
   border-radius: 10px;
-  font-size: 1.13rem;
+  font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.3s, transform 0.2s;
-  margin-top: 40px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  box-shadow: var(--button-shadow);
+}
+.stat-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .save-btn:hover {

@@ -117,7 +117,7 @@ async function loadComments() {
     console.error('Error loading comments:', error);
     tableBody.innerHTML = `
       <tr>
-        <td colspan="5" style="text-align: center; padding: 40px; color: #d32f2f;">
+      <td colspan="5" style="text-align: center; padding: 40px; color: var(--danger);">
           ❌ Yorumlar yüklenirken hata oluştu.
         </td>
       </tr>
@@ -207,9 +207,9 @@ async function loadOrders() {
       ).join(', ');
 
       const statusColors = {
-        'pending': '#ff9800',
-        'completed': '#4caf50',
-        'cancelled': '#f44336'
+        'pending': 'var(--warning)',
+        'completed': 'var(--success)',
+        'cancelled': 'var(--danger)'
       };
 
       const statusLabels = {
@@ -251,8 +251,8 @@ async function loadOrders() {
   } catch (error) {
     console.error('Error loading orders:', error);
     tableBody.innerHTML = `
-      <tr>
-        <td colspan="6" style="text-align: center; padding: 40px; color: #d32f2f;">
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 40px; color: var(--danger);">
           ❌ Siparişler yüklenirken hata oluştu.
         </td>
       </tr>
@@ -419,7 +419,7 @@ async function loadProducts() {
         <td>${product.name}</td>
         <td>${product.description}</td>
         <td>${product.price.toFixed(2)} ₺</td>
-        <td style="color: ${product.stock < 10 ? '#d32f2f' : '#2e7d32'}; font-weight: bold;">
+        <td style="color: ${product.stock < 10 ? 'var(--danger)' : '#2e7d32'}; font-weight: bold;">
           ${product.stock} adet
         </td>
         <td>
@@ -433,8 +433,8 @@ async function loadProducts() {
     console.error('Error loading products:', error);
     const tableBody = document.getElementById('productsTableBody');
     tableBody.innerHTML = `
-      <tr>
-        <td colspan="6" style="text-align: center; padding: 40px; color: #d32f2f;">
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 40px; color: var(--danger);">
           ❌ Ürünler yüklenirken hata oluştu. Supabase bağlantınızı kontrol edin.
         </td>
       </tr>
@@ -509,7 +509,7 @@ function renderMediaGallery() {
         position: absolute;
         top: 5px;
         right: 5px;
-        background: #d32f2f;
+        background: var(--danger);
         color: white;
         border: none;
         border-radius: 50%;
@@ -860,7 +860,7 @@ async function saveHeroSettings(event) {
     const { url, isVideo } = await uploadHeroBackground(file);
 
     submitBtn.textContent = '✓ Kaydedildi!';
-    submitBtn.style.background = '#4CAF50';
+    submitBtn.style.background = 'var(--success)';
 
     // Update status display
     await updateHeroBackgroundStatus();

@@ -1,12 +1,73 @@
-/* CSS Variables */
+/* CSS Variables - central theme / colors / spacing */
 :root {
+  --primary: #ff8daa; /* A slightly stronger primary pink for more contrast */
+  --secondary: #f4acb7; /* softer secondary */
+  --accent: #7de581; /* green accent for CTAs */
+  --dark-brown: #432c25; /* darker brown for headings and strong contrast */
+  --cream: #faf5f1; /* soft cream background */
+  --bg-light: #ffffff; /* main page background */
+  --text-dark: #222222; /* default text color */
+  --text-muted: #666666; /* muted text */
+  --muted-2: #999999;
+  --danger: #d32f2f;
+  --success: #4caf50;
+  --success-dark: #45a049;
+  --warning: #ffc107;
+  --glass: rgba(255, 255, 255, 0.6);
+  --radius: 12px;
+  --desktop-gap: 48px;
+  /* Spacing scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 48px;
+  --font-sans: "Oxygen", Tahoma, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial;
+  --font-heading: "Oswald", var(--font-sans);
+  --button-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Move page background to body (previously mis-placed inside :root) */
+html,
+body {
   background-color: var(--bg-light);
-  --primary: #FFCAD4;
-  --secondary: #F4ACB7;
-  --dark-brown: #9D8189;
-  --cream: #f6f6f6;
-  --green: #7de581;
-  --text-dark: #000000;
-  --text-muted: #666666;
-  --bg-light: #ffffff;
+}
+
+/* Small global reset and accessible defaults */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+body {
+  color: var(--text-dark);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+img,
+picture,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* unified link/button reset */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+/* minimal accessible focus style */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 40%, white);
+  outline-offset: 3px;
 }
